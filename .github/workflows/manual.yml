@@ -88,9 +88,7 @@ jobs:
         mkdir -p ${{ github.workspace }}/build
         cd ${{ github.workspace }}/build
         git clone -b ${{ inputs.ng_branch }} https://github.com/${{ inputs.ng_repo }}/v2rayNG.git
-        ls -al
         cd ${{ github.workspace }}/build/v2rayNG
-        ls -al
         git reset --hard ${{ inputs.ng_commit_id }}
 
     - name: edit v2rayNG source code
@@ -109,7 +107,6 @@ jobs:
         git clone -b ${{ inputs.x_lib_branch }} https://github.com/${{ inputs.x_lib_repo }}/AndroidLibXrayLite.git
         cd ${{ github.workspace }}/build/AndroidLibXrayLite
         git reset --hard ${{ inputs.x_lib_commit_id }}
-        go get github.com/xtls/xray-core@${{ inputs.x_commit_id }}
 
     - name: use git remote repo xray[current]
       if: ${{ inputs.x_lib_repo == 'DTCproto' }}
