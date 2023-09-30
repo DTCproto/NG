@@ -1,0 +1,192 @@
+# This workflow will build a golang project
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-go
+
+name: BUILD_APK_BY_MANUAL
+
+on:
+  workflow_dispatch:
+    inputs:
+      x_branch:
+        description: '指定Xray-core分支'
+        required: true
+        default: 'main'
+        type: choice
+        options:
+        - 'main'
+      x_commit_id:
+        description: '指定Xray-core使用commit id版本'
+        required: true
+        default: 'HEAD~0'
+        type: string
+      x_lib_repo:
+        description: '指定AndroidLibXrayLite仓库'
+        required: true
+        default: '2dust'
+        type: choice
+        options:
+        - 'DTCproto'
+        - '2dust'
+        - 'yuhan6665'
+      x_lib_branch:
+        description: '指定AndroidLibXrayLite分支'
+        required: true
+        default: 'main'
+        type: string
+      x_lib_commit_id:
+        description: '指定AndroidLibXrayLite使用commit id版本'
+        required: true
+        default: 'HEAD~0'
+        type: string
+      ng_repo:
+        description: '指定v2rayNG仓库'
+        required: true
+        default: '2dust'
+        type: choice
+        options:
+        - '2dust'
+        - 'yuhan6665'
+      ng_branch:
+        description: '指定v2rayNG分支'
+        required: true
+        default: 'main'
+        type: string
+      ng_commit_id:
+        description: '指定v2rayNG使用commit id版本'
+        required: true
+        default: 'HEAD~0'
+        type: string
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Java
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+    - name: java version
+      run: |
+        java --version
+
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.21'
+    - name: Install gomobile
+      run: |
+        go install golang.org/x/mobile/cmd/gomobile@latest
+        echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
+    
+    - name: Set up Gradle
+      uses: gradle/gradle-build-action@v2
+    
+    - name: git clone v2rayNG
+      run: |
+        mkdir -p ${{ github.workspace }}/build
+        cd ${{ github.workspace }}/build
+        git clone -b {{ inputs.ng_branch }} https://github.com/{{ inputs.ng_repo }}/v2rayNG.git
+        cd ${{ github.workspace }}/build/v2rayNG
+        git reset --hard ${{ inputs.ng_commit_id }}
+
+    - name: edit v2rayNG source code
+      run: |
+        cd ${{ github.workspace }}/build/v2rayNG/V2rayNG
+        chmod 755 *
+        sed -i 's/-XX:MaxPermSize=512m/ /' ${{ github.workspace }}/build/v2rayNG/V2rayNG/gradle.properties
+        sed -i 's/\/\/    /    /' ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/build.gradle
+      #  cat ${{ github.workspace }}/ActionsBuild/build.ext.gradle > ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/build.gradle
+      #  sed -i 's/applicationId "com.v2ray.ang"/applicationId "com.v2ray.ang.dev"/' ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/build.gradle
+
+    - name: git clone AndroidLibXrayLite
+      run: |
+        mkdir -p ${{ github.workspace }}/build
+        cd ${{ github.workspace }}/build
+        git clone -b {{ inputs.x_lib_branch }} https://github.com/{{ inputs.x_lib_repo }}/AndroidLibXrayLite.git
+        cd ${{ github.workspace }}/build/AndroidLibXrayLite
+        git reset --hard ${{ inputs.x_lib_commit_id }}
+        go get github.com/xtls/xray-core@${{ inputs.x_commit_id }}
+
+    - name: use git remote repo xray[current]
+      if: ${{ inputs.x_lib_repo == 'DTCproto' }}
+      run: |
+        cd ${{ github.workspace }}/build/AndroidLibXrayLite/ActionsBuild
+        rm -rf Xray-core
+        git clone -b ${{ inputs.x_branch }} https://github.com/XTLS/Xray-core.git
+        cd ${{ github.workspace }}/build/AndroidLibXrayLite/ActionsBuild/Xray-core
+        git reset --hard ${{ inputs.x_commit_id }}
+        echo "x_short_version=$(git rev-parse --short HEAD)" >> "$GITHUB_ENV"
+        echo ${x_short_version} | xargs -I '{}' sed -i 's/f7c20b8/{}/' ${{ github.workspace }}/libv2ray_main.go
+        - name: use git remote repo xray
+
+    - name: use git remote repo xray
+      if: ${{ inputs.x_lib_repo != 'DTCproto' }}
+      run: |
+        cd ${{ github.workspace }}/build/AndroidLibXrayLite
+        mkdir -p ${{ github.workspace }}/build/AndroidLibXrayLite/ActionsBuild
+        rm -rf Xray-core
+        git clone -b ${{ inputs.x_branch }} https://github.com/XTLS/Xray-core.git
+        cd ${{ github.workspace }}/build/AndroidLibXrayLite/ActionsBuild/Xray-core
+        git reset --hard ${{ inputs.x_commit_id }}
+        echo "x_short_version=$(git rev-parse --short HEAD)" >> "$GITHUB_ENV"
+
+    - name: go get specify xray
+      run: |
+        cd ${{ github.workspace }}/build/AndroidLibXrayLite
+        go get github.com/xtls/xray-core@${x_short_version}
+
+    - name: Build xray
+      run: |
+        cd ${{ github.workspace }}/build/AndroidLibXrayLite/ActionsBuild/Xray-core
+        mkdir build_assets
+        CGO_ENABLED=0 GOOS=linux GOARCH=amd64  go build -v -o build_assets/xray -trimpath -ldflags "-s -w -buildid=" ./main
+        CGO_ENABLED=0 GOOS=linux GOARCH=arm64  go build -v -o build_assets/xray_arm64 -trimpath -ldflags "-s -w -buildid=" ./main
+        CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -v -o build_assets/xray.exe -trimpath -ldflags "-s -w -buildid=" ./main
+
+    - name: Build aar
+      run: |
+        cd ${{ github.workspace }}/build/AndroidLibXrayLite
+        gomobile init
+        go mod tidy -v
+        gomobile bind -v -androidapi 19 -ldflags='-s -w' ./
+        cp *.aar ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/libs/
+
+    - name: Build APK
+      run: |
+        cd ${{ github.workspace }}/build/v2rayNG/V2rayNG
+        ./gradlew assembleRelease
+
+    - name: Upload xray exe
+      uses: actions/upload-artifact@v3
+      with:
+        name: xray
+        path: |
+          ${{ github.workspace }}/build/AndroidLibXrayLite/ActionsBuild/Xray-core/build_assets/*
+
+    - name: Upload aar
+      uses: actions/upload-artifact@v3
+      with:
+        name: aar
+        path: |
+          ${{ github.workspace }}/build/AndroidLibXrayLite/*.aar
+    
+    - name: Upload dev apk
+      uses: actions/upload-artifact@v3
+      with:
+        name: dev_apks
+        path: |
+          ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/build/outputs/apk/dev/**/*.apk
+          !${{ github.workspace }}/**/*null.apk
+          !${{ github.workspace }}/**/*x86.apk
+
+    - name: Upload release apk
+      uses: actions/upload-artifact@v3
+      with:
+        name: release_apks
+        path: |
+          ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/build/outputs/apk/prod/**/*.apk
+          !${{ github.workspace }}/**/*null.apk
+          !${{ github.workspace }}/**/*x86.apk
+        # ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/build/outputs/apk/release/**/*.apk
