@@ -48,7 +48,7 @@ on:
       ng_branch:
         description: '指定v2rayNG分支'
         required: true
-        default: 'main'
+        default: 'master'
         type: string
       ng_commit_id:
         description: '指定v2rayNG使用commit id版本'
@@ -88,7 +88,9 @@ jobs:
         mkdir -p ${{ github.workspace }}/build
         cd ${{ github.workspace }}/build
         git clone -b {{ inputs.ng_branch }} https://github.com/{{ inputs.ng_repo }}/v2rayNG.git
+        ls -al
         cd ${{ github.workspace }}/build/v2rayNG
+        ls -al
         git reset --hard ${{ inputs.ng_commit_id }}
 
     - name: edit v2rayNG source code
