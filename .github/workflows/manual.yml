@@ -123,11 +123,10 @@ jobs:
     - name: use git remote repo xray
       if: ${{ inputs.x_lib_repo != 'DTCproto' }}
       run: |
-        cd ${{ github.workspace }}/build/AndroidLibXrayLite
         mkdir -p ${{ github.workspace }}/build/AndroidLibXrayLite/ActionsBuild
+        cd ${{ github.workspace }}/build/AndroidLibXrayLite/ActionsBuild
         rm -rf Xray-core
         git clone -b ${{ inputs.x_branch }} https://github.com/XTLS/Xray-core.git
-        ls -al
         cd ${{ github.workspace }}/build/AndroidLibXrayLite/ActionsBuild/Xray-core
         git reset --hard ${{ inputs.x_commit_id }}
         echo "x_short_version=$(git rev-parse --short HEAD)" >> "$GITHUB_ENV"
