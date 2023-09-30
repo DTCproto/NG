@@ -117,8 +117,7 @@ jobs:
           cd ${{ github.workspace }}/build/AndroidLibXrayLite/ActionsBuild/Xray-core
           git reset --hard ${{ inputs.x_commit_id }}
           echo "x_short_version=$(git rev-parse --short HEAD)" >> "$GITHUB_ENV"
-          echo ${x_short_version} | xargs -I '{}' sed -i 's/f7c20b8/{}/' ${{ github.workspace }}/libv2ray_main.go
-          - name: use git remote repo xray
+          echo ${x_short_version} | xargs -I '{}' sed -i 's/f7c20b8/{}/' ${{ github.workspace }}/build/AndroidLibXrayLite/libv2ray_main.go
 
       - name: use git remote repo xray
         if: ${{ inputs.x_lib_repo != 'DTCproto' }}
