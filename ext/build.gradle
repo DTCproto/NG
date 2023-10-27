@@ -12,6 +12,21 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
+    signingConfigs {
+        if (project.hasProperty("RELEASE_STORE_FILE")) {
+            myConfig {
+                storeFile file(RELEASE_STORE_FILE)
+                storePassword RELEASE_STORE_PASSWORD
+                keyAlias RELEASE_KEY_ALIAS
+                keyPassword RELEASE_KEY_PASSWORD
+                v1SigningEnabled false
+                v2SigningEnabled true
+                enableV3Signing = true
+                enableV4Signing = true
+            }
+        }
+    }
+
     defaultConfig {
         applicationId "com.v2ray.ang"
         minSdkVersion 21
@@ -23,12 +38,18 @@ android {
 
     buildTypes {
         release {
+            if (project.hasProperty("RELEASE_STORE_FILE")) {
+                signingConfig signingConfigs.myConfig
+            }
             minifyEnabled false
             zipAlignEnabled false
             shrinkResources false
             ndk.abiFilters 'x86', 'x86_64', 'armeabi-v7a', 'arm64-v8a'
         }
         debug {
+            if (project.hasProperty("RELEASE_STORE_FILE")) {
+                signingConfig signingConfigs.myConfig
+            }
             minifyEnabled false
             zipAlignEnabled false
             shrinkResources false
@@ -36,20 +57,20 @@ android {
         }
     }
 
-//    flavorDimensions "versions"
-//
-//    productFlavors {
-//        dev {
-//            applicationIdSuffix = ".dev"
-//            versionNameSuffix = "-dev"
-//        }
-//        pre_release {
-//            applicationIdSuffix = ".pre"
-//            versionNameSuffix = "-pre-release"
-//        }
-//        prod {
-//        }
-//    }
+    flavorDimensions "versions"
+
+    productFlavors {
+        dev {
+            applicationIdSuffix = ".dev"
+            versionNameSuffix = "-dev"
+        }
+        pre_release {
+            applicationIdSuffix = ".pre"
+            versionNameSuffix = "-pre-release"
+        }
+        prod {
+        }
+    }
 
     sourceSets {
         main {
