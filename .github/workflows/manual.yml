@@ -96,8 +96,8 @@ jobs:
           cd ${{ github.workspace }}/build/v2rayNG/V2rayNG
           chmod 755 *
           sed -i 's/-XX:MaxPermSize=512m/ /' ${{ github.workspace }}/build/v2rayNG/V2rayNG/gradle.properties
-          cat ${{ github.workspace }}/ext/build.gradle > ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/build.gradle
-        #  sed -i 's/\/\/    /    /' ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/build.gradle
+          sed -i 's/\/\/    /    /' ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/build.gradle
+        #  cat ${{ github.workspace }}/ext/build.gradle > ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/build.gradle
         #  sed -i 's/applicationId "com.v2ray.ang"/applicationId "com.v2ray.ang.dev"/' ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/build.gradle
 
       - name: import apk sign config
