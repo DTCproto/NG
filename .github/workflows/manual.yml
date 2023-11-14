@@ -146,17 +146,20 @@ jobs:
       - name: edit lib version[current]
         if: ${{ inputs.x_lib_repo == 'DTCproto' }}
         run: |
+          sed -i 's/var version  = 24//g' ${{ github.workspace }}/build/AndroidLibXrayLite/libv2ray_main.go
           echo ${x_short_version} | xargs -I '{}' sed -i 's/f7c20b8/{}/g' ${{ github.workspace }}/build/AndroidLibXrayLite/libv2ray_main.go
 
       - name: edit lib version
         if: ${{ inputs.x_lib_repo != 'DTCproto' }}
         run: |
+          sed -i 's/var version  = 24//g' ${{ github.workspace }}/build/AndroidLibXrayLite/libv2ray_main.go
           echo ${x_short_version} | xargs -I '{}' sed -i 's/fmt.Sprintf("Lib v%d, Xray-core v%s", version, v2core.Version())/fmt.Sprintf("(Lib)Xray-core v%s", v2core.Version()+"@{}")/g' ${{ github.workspace }}/build/AndroidLibXrayLite/libv2ray_main.go
 
       - name: go get specify xray
         run: |
           cd ${{ github.workspace }}/build/AndroidLibXrayLite
           go get github.com/xtls/xray-core@${x_short_version}
+          cat ${{ github.workspace }}/build/AndroidLibXrayLite/go.mod
 
       - name: Build xray
         run: |
