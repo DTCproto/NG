@@ -135,6 +135,7 @@ jobs:
 
       - name: use git remote repo xray
         run: |
+          mkdir -p ${{ github.workspace }}/build/AndroidLibXrayLite/ActionsBuild
           cd ${{ github.workspace }}/build/AndroidLibXrayLite/ActionsBuild
           rm -rf Xray-core
           git clone -b ${{ inputs.x_branch }} https://github.com/XTLS/Xray-core.git
