@@ -142,7 +142,7 @@ jobs:
           cd ${{ github.workspace }}/build/AndroidLibXrayLite/ActionsBuild/Xray-core
           git reset --hard ${{ inputs.x_commit_id }}
           echo "x_short_version=$(git rev-parse --short HEAD)" >> "$GITHUB_ENV"
-          echo ${x_short_version} | xargs -I '{}' sed -i 's/f7c20b8/{}/' ${{ github.workspace }}/build/AndroidLibXrayLite/libv2ray_main.go
+          echo ${x_short_version} | xargs -I '{}' sed -i 's/f7c20b8/{}/g' ${{ github.workspace }}/build/AndroidLibXrayLite/libv2ray_main.go
 
       - name: use git remote repo xray
         if: ${{ inputs.x_lib_repo != 'DTCproto' }}
@@ -154,7 +154,7 @@ jobs:
           cd ${{ github.workspace }}/build/AndroidLibXrayLite/ActionsBuild/Xray-core
           git reset --hard ${{ inputs.x_commit_id }}
           echo "x_short_version=$(git rev-parse --short HEAD)" >> "$GITHUB_ENV"
-          echo ${x_short_version} | xargs -I '{}' sed -i 's/fmt.Sprintf("Lib v%d, V2fly-core v%s", version, v2core.Version())/fmt.Sprintf("(Lib)Xray-core v%s", v2core.Version()+"{}")/' ${{ github.workspace }}/build/AndroidLibXrayLite/libv2ray_main.go
+          echo ${x_short_version} | xargs -I '{}' sed -i 's/fmt.Sprintf("Lib v%d, V2fly-core v%s", version, v2core.Version())/fmt.Sprintf("(Lib)Xray-core v%s", v2core.Version()+"{}")/g' ${{ github.workspace }}/build/AndroidLibXrayLite/libv2ray_main.go
 
       - name: go get specify xray
         run: |
