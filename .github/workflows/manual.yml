@@ -159,7 +159,6 @@ jobs:
         run: |
           cd ${{ github.workspace }}/build/AndroidLibXrayLite
           go get github.com/xtls/xray-core@${x_short_version}
-          cat ${{ github.workspace }}/build/AndroidLibXrayLite/go.mod
 
       - name: Build xray
         run: |
