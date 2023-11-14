@@ -55,6 +55,14 @@ on:
         required: true
         default: 'HEAD~0'
         type: string
+      ng_build_gradle:
+        description: '指定v2rayNG使用的build gradle文件仓库'
+        required: true
+        default: 'DTCproto'
+        type: choice
+        options:
+          - 'DTCproto'
+          - '2dust'
 
 jobs:
   build:
@@ -91,13 +99,22 @@ jobs:
           cd ${{ github.workspace }}/build/v2rayNG
           git reset --hard ${{ inputs.ng_commit_id }}
 
+      - name: edit v2rayNG source code[current]
+        if: ${{ inputs.ng_build_gradle == 'DTCproto' }}
+        run: |
+          cd ${{ github.workspace }}/build/v2rayNG/V2rayNG
+          chmod 755 *
+          sed -i 's/-XX:MaxPermSize=512m/ /' ${{ github.workspace }}/build/v2rayNG/V2rayNG/gradle.properties
+          cat ${{ github.workspace }}/ext/build.gradle > ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/build.gradle
+
+
       - name: edit v2rayNG source code
+        if: ${{ inputs.ng_build_gradle == '2dust' }}
         run: |
           cd ${{ github.workspace }}/build/v2rayNG/V2rayNG
           chmod 755 *
           sed -i 's/-XX:MaxPermSize=512m/ /' ${{ github.workspace }}/build/v2rayNG/V2rayNG/gradle.properties
           sed -i 's/\/\/    /    /' ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/build.gradle
-        #  cat ${{ github.workspace }}/ext/build.gradle > ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/build.gradle
         #  sed -i 's/applicationId "com.v2ray.ang"/applicationId "com.v2ray.ang.dev"/' ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/build.gradle
 
       - name: import apk sign config
@@ -137,6 +154,7 @@ jobs:
           cd ${{ github.workspace }}/build/AndroidLibXrayLite/ActionsBuild/Xray-core
           git reset --hard ${{ inputs.x_commit_id }}
           echo "x_short_version=$(git rev-parse --short HEAD)" >> "$GITHUB_ENV"
+          echo ${x_short_version} | xargs -I '{}' sed -i 's/fmt.Sprintf("Lib v%d, V2fly-core v%s", version, v2core.Version())/fmt.Sprintf("(Lib)Xray-core v%s", v2core.Version()+"{}")/' ${{ github.workspace }}/build/AndroidLibXrayLite/libv2ray_main.go
 
       - name: go get specify xray
         run: |
