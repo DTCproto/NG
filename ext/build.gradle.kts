@@ -14,7 +14,7 @@ android {
         minSdk = 21
         targetSdk = 34
         versionCode = 541
-        versionName = "1.8.15"
+        versionName = "1.8.15.dev"
         multiDexEnabled = true
         ndk {
             abiFilters += listOf("armeabi-v7a","arm64-v8a","x86","x86_64")
