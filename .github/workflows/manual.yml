@@ -114,7 +114,7 @@ jobs:
           cd ${{ github.workspace }}/build/v2rayNG/V2rayNG
           chmod 755 *
           sed -i 's/-XX:MaxPermSize=512m/ /' ${{ github.workspace }}/build/v2rayNG/V2rayNG/gradle.properties
-          sed -i 's/applicationId "com.v2ray.ang"/applicationId "com.v2ray.ang.dev"/' ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/build.gradle.kts
+          sed -i 's/applicationId = "com.v2ray.ang"/applicationId = "com.v2ray.ang.dev"/' ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/build.gradle.kts
 
       - name: import apk sign config
         run: |
@@ -180,34 +180,25 @@ jobs:
           ./gradlew assembleRelease
 
       - name: Upload xray exe
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: xray
           path: |
             ${{ github.workspace }}/build/AndroidLibXrayLite/ActionsBuild/Xray-core/build_assets/*
 
       - name: Upload aar
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: aar
           path: |
             ${{ github.workspace }}/build/AndroidLibXrayLite/*.aar
 
       - name: Upload dev apk
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: dev_apks
           path: |
             ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/build/outputs/apk/**/*.apk
             !${{ github.workspace }}/**/*null.apk
             !${{ github.workspace }}/**/*x86.apk
-
-      #- name: Upload release apk
-        #uses: actions/upload-artifact@v3
-       # with:
-         # name: release_apks
-         # path: |
-        #    ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/build/outputs/apk/**/*.apk
-         #   !${{ github.workspace }}/**/*null.apk
-         #   !${{ github.workspace }}/**/*x86.apk
-          # ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/build/outputs/apk/release/**/*.apk
+            !${{ github.workspace }}/**/*x86_64.apk
