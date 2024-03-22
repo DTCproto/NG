@@ -12,7 +12,7 @@ android {
         minSdk = 21
         targetSdk = 34
         versionCode = 550
-        versionName = "1.8.18"
+        versionName = "1.8.18.dev"
         multiDexEnabled = true
     }
 
