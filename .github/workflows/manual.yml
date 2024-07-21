@@ -58,7 +58,7 @@ on:
       ng_build_gradle:
         description: '指定v2rayNG使用的build gradle文件仓库'
         required: true
-        default: 'DTCproto'
+        default: '2dust'
         type: choice
         options:
           - 'DTCproto'
