@@ -183,6 +183,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: xray
+          compression-level: 9
           path: |
             ${{ github.workspace }}/build/AndroidLibXrayLite/ActionsBuild/Xray-core/build_assets/*
 
@@ -190,6 +191,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: aar
+          compression-level: 9
           path: |
             ${{ github.workspace }}/build/AndroidLibXrayLite/*.aar
 
@@ -197,6 +199,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: dev_apks
+          compression-level: 9
           path: |
             ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/build/outputs/apk/**/*.apk
             !${{ github.workspace }}/**/*null.apk
