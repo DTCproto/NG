@@ -28,13 +28,18 @@ android {
         }
     }
 
+    val signingStoreFile: File? = project.findProperty("SIGNING_STORE_FILE")?.let { file(it.toString()) }
+    val signingStorePassword: String? = project.findProperty("SIGNING_STORE_PASSWORD") as String?
+    val signingKeyAlias: String? = project.findProperty("SIGNING_KEY_ALIAS") as String?
+    val signingKeyPassword: String? = project.findProperty("SIGNING_KEY_PASSWORD") as String?
+
     signingConfigs {
-        if (project.hasProperty("RELEASE_STORE_FILE")) {
-            register("release") {
-                keyAlias = project.findProperty("RELEASE_KEY_ALIAS") ?: System.getenv("RELEASE_KEY_ALIAS")
-                keyPassword = project.findProperty("RELEASE_KEY_PASSWORD") ?: System.getenv("RELEASE_KEY_PASSWORD")
-                storeFile = file(project.findProperty("RELEASE_STORE_FILE") ?: System.getenv("RELEASE_STORE_FILE"))
-                storePassword = project.findProperty("RELEASE_STORE_PASSWORD") ?: System.getenv("RELEASE_STORE_PASSWORD")
+        if (project.hasProperty("SIGNING_STORE_FILE")) {
+            create("release") {
+                keyAlias = signingKeyAlias
+                keyPassword = signingKeyPassword
+                storeFile = signingStoreFile
+                storePassword = signingStorePassword
                 enableV1Signing = false
                 enableV2Signing = false
                 enableV3Signing = true
@@ -48,15 +53,15 @@ android {
         targetCompatibility = JavaVersion.VERSION_1_8
     }
     buildTypes {
-        release {
+        getByName("release") {
             if (project.hasProperty("RELEASE_STORE_FILE")) {
-                signingConfig signingConfigs.findByName("release")
+                signingConfig = signingConfigs.getByName("release")
             }
             isMinifyEnabled = false
         }
-        debug {
+        getByName("debug") {
             if (project.hasProperty("RELEASE_STORE_FILE")) {
-                signingConfig signingConfigs.findByName("release")
+                signingConfig = signingConfigs.getByName("release")
             }
             applicationIdSuffix = ".debug"
             isMinifyEnabled = false

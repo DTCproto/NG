@@ -89,7 +89,7 @@ jobs:
           echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
 
       - name: Set up Gradle
-        uses: gradle/actions/setup-gradle@v3
+        uses: gradle/actions/setup-gradle@v4
 
       - name: git clone v2rayNG
         run: |
@@ -118,10 +118,10 @@ jobs:
 
       - name: import apk sign config
         run: |
-          sed '$a\RELEASE_STORE_FILE=./dt.jks'      ${{ github.workspace }}/build/v2rayNG/V2rayNG/gradle.properties -i
-          sed '$a\RELEASE_KEY_ALIAS=dt'             ${{ github.workspace }}/build/v2rayNG/V2rayNG/gradle.properties -i
-          sed '$a\RELEASE_STORE_PASSWORD=dt@pwd'    ${{ github.workspace }}/build/v2rayNG/V2rayNG/gradle.properties -i
-          sed '$a\RELEASE_KEY_PASSWORD=dt@pwd'      ${{ github.workspace }}/build/v2rayNG/V2rayNG/gradle.properties -i
+          sed '$a\SIGNING_STORE_FILE=./dt.jks'      ${{ github.workspace }}/build/v2rayNG/V2rayNG/gradle.properties -i
+          sed '$a\SIGNING_KEY_ALIAS=dt'             ${{ github.workspace }}/build/v2rayNG/V2rayNG/gradle.properties -i
+          sed '$a\SIGNING_STORE_PASSWORD=dt@pwd'    ${{ github.workspace }}/build/v2rayNG/V2rayNG/gradle.properties -i
+          sed '$a\SIGNING_KEY_PASSWORD=dt@pwd'      ${{ github.workspace }}/build/v2rayNG/V2rayNG/gradle.properties -i
           cp ${{ github.workspace }}/.github/workflows/dt.jks ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/dt.jks
 
       - name: git clone AndroidLibXrayLite
