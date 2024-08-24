@@ -30,13 +30,13 @@ android {
 
     signingConfigs {
         if (project.hasProperty("RELEASE_STORE_FILE")) {
-            myConfig {
+            register("release") {
                 storeFile file(RELEASE_STORE_FILE)
                 storePassword RELEASE_STORE_PASSWORD
                 keyAlias RELEASE_KEY_ALIAS
                 keyPassword RELEASE_KEY_PASSWORD
-                v1SigningEnabled false
-                v2SigningEnabled true
+                enableV1Signing false
+                enableV2Signing false
                 enableV3Signing = true
                 enableV4Signing = true
             }
@@ -50,17 +50,16 @@ android {
     buildTypes {
         release {
             if (project.hasProperty("RELEASE_STORE_FILE")) {
-                signingConfig signingConfigs.myConfig
+                signingConfig signingConfigs.findByName("release")
             }
             isMinifyEnabled = false
-
         }
         debug {
             if (project.hasProperty("RELEASE_STORE_FILE")) {
-                signingConfig signingConfigs.myConfig
+                signingConfig signingConfigs.findByName("release")
             }
+            applicationIdSuffix = ".debug"
             isMinifyEnabled = false
-
         }
     }
 
