@@ -31,10 +31,10 @@ android {
     signingConfigs {
         if (project.hasProperty("RELEASE_STORE_FILE")) {
             register("release") {
-                storeFile file(RELEASE_STORE_FILE)
-                storePassword RELEASE_STORE_PASSWORD
-                keyAlias RELEASE_KEY_ALIAS
-                keyPassword RELEASE_KEY_PASSWORD
+                keyAlias = project.findProperty("RELEASE_KEY_ALIAS") ?: System.getenv("RELEASE_KEY_ALIAS")
+                keyPassword = project.findProperty("RELEASE_KEY_PASSWORD") ?: System.getenv("RELEASE_KEY_PASSWORD")
+                storeFile = file(project.findProperty("RELEASE_STORE_FILE") ?: System.getenv("RELEASE_STORE_FILE"))
+                storePassword = project.findProperty("RELEASE_STORE_PASSWORD") ?: System.getenv("RELEASE_STORE_PASSWORD")
                 enableV1Signing false
                 enableV2Signing false
                 enableV3Signing = true
