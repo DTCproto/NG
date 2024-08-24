@@ -36,10 +36,10 @@ android {
     signingConfigs {
         if (project.hasProperty("SIGNING_STORE_FILE")) {
             create("release") {
-                keyAlias = signingKeyAlias
-                keyPassword = signingKeyPassword
                 storeFile = signingStoreFile
                 storePassword = signingStorePassword
+                keyAlias = signingKeyAlias
+                keyPassword = signingKeyPassword
                 enableV1Signing = false
                 enableV2Signing = false
                 enableV3Signing = true
@@ -54,13 +54,13 @@ android {
     }
     buildTypes {
         getByName("release") {
-            if (project.hasProperty("RELEASE_STORE_FILE")) {
+            if (project.hasProperty("SIGNING_STORE_FILE")) {
                 signingConfig = signingConfigs.getByName("release")
             }
             isMinifyEnabled = false
         }
         getByName("debug") {
-            if (project.hasProperty("RELEASE_STORE_FILE")) {
+            if (project.hasProperty("SIGNING_STORE_FILE")) {
                 signingConfig = signingConfigs.getByName("release")
             }
             applicationIdSuffix = ".debug"
