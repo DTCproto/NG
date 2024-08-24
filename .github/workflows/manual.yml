@@ -195,13 +195,25 @@ jobs:
           path: |
             ${{ github.workspace }}/build/AndroidLibXrayLite/*.aar
 
-      - name: Upload dev apk
+      - name: Upload arm dev apk
         uses: actions/upload-artifact@v4
         with:
-          name: dev_apks
+          name: arm_dev_apks
           compression-level: 9
           path: |
             ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/build/outputs/apk/**/*.apk
             !${{ github.workspace }}/**/*null.apk
             !${{ github.workspace }}/**/*x86.apk
             !${{ github.workspace }}/**/*x86_64.apk
+            !${{ github.workspace }}/**/*riscv64.apk
+            !${{ github.workspace }}/**/*mips.apk
+            !${{ github.workspace }}/**/*armeabi-v7a.apk
+            !${{ github.workspace }}/**/*armeabi.apk
+
+      - name: Upload all dev apk
+        uses: actions/upload-artifact@v4
+        with:
+          name: all_dev_apks
+          compression-level: 9
+          path: |
+            ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/build/outputs/apk/**/*.apk
