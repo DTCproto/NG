@@ -185,7 +185,7 @@ jobs:
       - name: Upload xray exe
         uses: actions/upload-artifact@v4
         with:
-          name: xray-bin.7z
+          name: bin-${x_short_version}.7z
           compression-level: 9
           path: |
             ${{ github.workspace }}/build/AndroidLibXrayLite/ActionsBuild/Xray-core/build_assets/*
@@ -193,7 +193,7 @@ jobs:
       - name: Upload aar
         uses: actions/upload-artifact@v4
         with:
-          name: aar.7z
+          name: aar-${x_short_version}.7z
           compression-level: 9
           path: |
             ${{ github.workspace }}/build/AndroidLibXrayLite/*.aar
@@ -201,7 +201,7 @@ jobs:
       - name: Upload arm dev apk
         uses: actions/upload-artifact@v4
         with:
-          name: arm_dev_apks.7z
+          name: apks_arm_dev-${x_short_version}.7z
           compression-level: 9
           path: |
             ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/build/outputs/apk/**/*.apk
@@ -214,7 +214,7 @@ jobs:
       - name: Upload all dev apk
         uses: actions/upload-artifact@v4
         with:
-          name: all_dev_apks.7z
+          name: apks_all_dev-${x_short_version}.7z
           compression-level: 9
           path: |
             ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/build/outputs/apk/**/*.apk
@@ -227,7 +227,7 @@ jobs:
         uses: actions/download-artifact@v4
         if: ${{ inputs.release_archives }}
         with:
-          pattern: "*_apks.7z"
+          pattern: "apks_*.7z"
           merge-multiple: true
 
       - name: Get current date time
@@ -244,4 +244,4 @@ jobs:
           prerelease: false
           body: "FFmpeg nonfree build result."
           files: |
-            ffmpeg-*.7z
+            apks_*.7z
