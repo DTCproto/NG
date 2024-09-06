@@ -230,7 +230,10 @@ jobs:
           pattern: "apks_*"
           merge-multiple: true
           path: ${{ github.workspace }}/archives
-          run: ls -R ${{ github.workspace }}/archives
+      
+      - name: show down files
+        run: |
+          ls -R ${{ github.workspace }}/archives
 
       - name: Get current date time
         run: |
@@ -246,6 +249,5 @@ jobs:
           prerelease: false
           body: "V2rayNG(Xray) build result."
           files: |
-            ${{ github.workspace }}/archives/*.7z
-            ${{ github.workspace }}/archives/*.zip
+            ${{ github.workspace }}/archives/**
 
