@@ -244,4 +244,4 @@ jobs:
           prerelease: false
           body: "FFmpeg nonfree build result."
           files: |
-            apks_*.7z
+            ${{ github.workspace }}/**/apks_*.7z
