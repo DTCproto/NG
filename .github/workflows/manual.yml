@@ -185,7 +185,7 @@ jobs:
       - name: Upload xray exe
         uses: actions/upload-artifact@v4
         with:
-          name: bin-${{ env.x_short_version }}.7z
+          name: bin-${{ env.x_short_version }}
           compression-level: 9
           path: |
             ${{ github.workspace }}/build/AndroidLibXrayLite/ActionsBuild/Xray-core/build_assets/*
@@ -193,7 +193,7 @@ jobs:
       - name: Upload aar
         uses: actions/upload-artifact@v4
         with:
-          name: aar-${{ env.x_short_version }}.7z
+          name: aar-${{ env.x_short_version }}
           compression-level: 9
           path: |
             ${{ github.workspace }}/build/AndroidLibXrayLite/*.aar
@@ -201,7 +201,7 @@ jobs:
       - name: Upload arm dev apk
         uses: actions/upload-artifact@v4
         with:
-          name: apks_arm_dev-${{ env.x_short_version }}.7z
+          name: apks_arm_dev-${{ env.x_short_version }}
           compression-level: 9
           path: |
             ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/build/outputs/apk/**/*.apk
@@ -214,7 +214,7 @@ jobs:
       - name: Upload all dev apk
         uses: actions/upload-artifact@v4
         with:
-          name: apks_all_dev-${{ env.x_short_version }}.7z
+          name: apks_all_dev-${{ env.x_short_version }}
           compression-level: 9
           path: |
             ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/build/outputs/apk/**/*.apk
@@ -227,7 +227,7 @@ jobs:
         uses: actions/download-artifact@v4
         if: ${{ inputs.release_archives }}
         with:
-          pattern: "apks_*.7z"
+          pattern: "apks_*"
           merge-multiple: true
           path: ${{ github.workspace }}/archives
           run: ls -R ${{ github.workspace }}/archives
@@ -247,4 +247,5 @@ jobs:
           body: "V2rayNG(Xray) build result."
           files: |
             ${{ github.workspace }}/archives/*.7z
+            ${{ github.workspace }}/archives/*.zip
 
