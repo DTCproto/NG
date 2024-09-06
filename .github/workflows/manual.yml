@@ -201,15 +201,16 @@ jobs:
       - name: Upload arm dev apk
         uses: actions/upload-artifact@v4
         with:
-          name: apks_arm_dev-${{ env.x_short_version }}
+          name: apks_arm_v8a_dev-${{ env.x_short_version }}
           compression-level: 9
           path: |
             ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/build/outputs/apk/**/*.apk
-            !${{ github.workspace }}/**/*null*.apk
-            !${{ github.workspace }}/**/*x86*.apk
-            !${{ github.workspace }}/**/*riscv*.apk
-            !${{ github.workspace }}/**/*mips*.apk
-            !${{ github.workspace }}/**/*armeabi*.apk
+            !${{ github.workspace }}/**/*null*
+            !${{ github.workspace }}/**/*x86*
+            !${{ github.workspace }}/**/*riscv*
+            !${{ github.workspace }}/**/*mips*
+            !${{ github.workspace }}/**/*armeabi*
+            !${{ github.workspace }}/**/*universal*
 
       - name: Upload all dev apk
         uses: actions/upload-artifact@v4
@@ -223,21 +224,30 @@ jobs:
     needs: [build]
     runs-on: ubuntu-latest
     steps:
+      - name: Get current date time
+        run: |
+          echo "current_date_time=$(date +'%Y-%m-%d-%H-%M')" >> "$GITHUB_ENV"
+
       - name: Download TEMP archives
         uses: actions/download-artifact@v4
         if: ${{ inputs.release_archives }}
         with:
-          pattern: "apks_*"
+          pattern: "apks_all*"
           merge-multiple: true
-          path: ${{ github.workspace }}/archives
-      
+          path: ${{ github.workspace }}/temp
+
       - name: show down files
         run: |
-          ls -R ${{ github.workspace }}/archives
+          ls -R ${{ github.workspace }}/temp
 
-      - name: Get current date time
+      - name: 7-Zip FFmpeg binaries
         run: |
-          echo "current_date_time=$(date +'%Y-%m-%d-%H-%M')" >> "$GITHUB_ENV"
+          7z a -mx9 ${{ github.workspace }}/archives/apks_all-V-${{ env.current_date_time }}.7z ${{ github.workspace }}/temp/*.apk
+          7z a -mx9 ${{ github.workspace }}/archives/apks_arm_v8a-V-${{ env.current_date_time }}.7z ${{ github.workspace }}/temp/*arm64-v8a.apk
+
+      - name: show zip files
+        run: |
+          ls -R ${{ github.workspace }}/archives
 
       - name: Release archives
         uses: softprops/action-gh-release@v2
@@ -250,4 +260,3 @@ jobs:
           body: "V2rayNG(Xray) build result."
           files: |
             ${{ github.workspace }}/archives/**
-
