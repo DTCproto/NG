@@ -61,7 +61,8 @@ on:
           - "DTCproto"
           - "2dust"
       release_archives:
-        description: enable release archives
+        description: "enable release archives"
+        default: true
         type: boolean
 
 concurrency:
