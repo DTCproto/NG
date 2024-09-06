@@ -148,18 +148,18 @@ jobs:
       - name: edit lib version[current]
         if: ${{ inputs.x_lib_repo == 'DTCproto' }}
         run: |
-          echo ${x_short_version} | xargs -I '{}' sed -i 's/f7c20b8/{}/g' ${{ github.workspace }}/build/AndroidLibXrayLite/libv2ray_main.go
+          echo ${{ env.x_short_version }} | xargs -I '{}' sed -i 's/f7c20b8/{}/g' ${{ github.workspace }}/build/AndroidLibXrayLite/libv2ray_main.go
 
       - name: edit lib version
         if: ${{ inputs.x_lib_repo != 'DTCproto' }}
         run: |
           sed -i 's/var version/\/\/ var version/g' ${{ github.workspace }}/build/AndroidLibXrayLite/libv2ray_main.go
-          echo ${x_short_version} | xargs -I '{}' sed -i 's/fmt.Sprintf("Lib v%d, Xray-core v%s", version, v2core.Version())/fmt.Sprintf("(Lib)Xray-core v%s", v2core.Version()+"@{}")/g' ${{ github.workspace }}/build/AndroidLibXrayLite/libv2ray_main.go
+          echo ${{ env.x_short_version }} | xargs -I '{}' sed -i 's/fmt.Sprintf("Lib v%d, Xray-core v%s", version, v2core.Version())/fmt.Sprintf("(Lib)Xray-core v%s", v2core.Version()+"@{}")/g' ${{ github.workspace }}/build/AndroidLibXrayLite/libv2ray_main.go
 
       - name: go get specify xray
         run: |
           cd ${{ github.workspace }}/build/AndroidLibXrayLite
-          go get github.com/xtls/xray-core@${x_short_version}
+          go get github.com/xtls/xray-core@${{ env.x_short_version }}
 
       - name: Build xray
         run: |
@@ -238,8 +238,8 @@ jobs:
         uses: softprops/action-gh-release@v2
         if: ${{ inputs.release_archives }}
         with:
-          tag_name: "V-${current_date_time}"
-          name: "V-${current_date_time}"
+          tag_name: "V-${{ env.current_date_time }}"
+          name: "V-${{ env.current_date_time }}"
           token: ${{ secrets.GITHUB_TOKEN }}
           prerelease: false
           body: "FFmpeg nonfree build result."
