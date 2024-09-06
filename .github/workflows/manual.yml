@@ -229,6 +229,7 @@ jobs:
         with:
           pattern: "apks_*.7z"
           merge-multiple: true
+          path: ${{ github.workspace }}/archives
 
       - name: Get current date time
         run: |
@@ -244,4 +245,4 @@ jobs:
           prerelease: false
           body: "FFmpeg nonfree build result."
           files: |
-            ${{ github.workspace }}/**/apks_*.7z
+            ${{ github.workspace }}/archives/apks_*.7z
