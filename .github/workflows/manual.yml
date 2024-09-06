@@ -227,7 +227,7 @@ jobs:
         uses: actions/download-artifact@v4
         if: ${{ inputs.release_archives }}
         with:
-          pattern: *_apks.7z
+          pattern: "*_apks.7z"
           merge-multiple: true
 
       - name: Get current date time
