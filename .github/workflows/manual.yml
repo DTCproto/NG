@@ -1,68 +1,71 @@
-# This workflow will build a golang project
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-go
-
 name: BUILD_APK_BY_MANUAL
 
 on:
   workflow_dispatch:
     inputs:
       x_branch:
-        description: '指定Xray-core分支'
+        description: "指定Xray-core分支"
         required: true
-        default: 'main'
+        default: "main"
         type: choice
         options:
-          - 'main'
+          - "main"
       x_commit_id:
-        description: '指定Xray-core使用commit id版本'
+        description: "指定Xray-core使用commit id版本"
         required: true
-        default: 'HEAD~0'
+        default: "HEAD~0"
         type: string
       x_lib_repo:
-        description: '指定AndroidLibXrayLite仓库'
+        description: "指定AndroidLibXrayLite仓库"
         required: true
-        default: '2dust'
+        default: "2dust"
         type: choice
         options:
-          - 'DTCproto'
-          - '2dust'
-          - 'yuhan6665'
+          - "DTCproto"
+          - "2dust"
+          - "yuhan6665"
       x_lib_branch:
-        description: '指定AndroidLibXrayLite分支'
+        description: "指定AndroidLibXrayLite分支"
         required: true
-        default: 'main'
+        default: "main"
         type: string
       x_lib_commit_id:
-        description: '指定AndroidLibXrayLite使用commit id版本'
+        description: "指定AndroidLibXrayLite使用commit id版本"
         required: true
-        default: 'HEAD~0'
+        default: "HEAD~0"
         type: string
       ng_repo:
-        description: '指定v2rayNG仓库'
+        description: "指定v2rayNG仓库"
         required: true
-        default: '2dust'
+        default: "2dust"
         type: choice
         options:
-          - '2dust'
-          - 'yuhan6665'
+          - "2dust"
+          - "yuhan6665"
       ng_branch:
-        description: '指定v2rayNG分支'
+        description: "指定v2rayNG分支"
         required: true
-        default: 'master'
+        default: "master"
         type: string
       ng_commit_id:
-        description: '指定v2rayNG使用commit id版本'
+        description: "指定v2rayNG使用commit id版本"
         required: true
-        default: 'HEAD~0'
+        default: "HEAD~0"
         type: string
       ng_build_gradle:
-        description: '指定v2rayNG使用的build gradle文件仓库'
+        description: "指定v2rayNG使用的build gradle文件仓库"
         required: true
-        default: '2dust'
+        default: "2dust"
         type: choice
         options:
-          - 'DTCproto'
-          - '2dust'
+          - "DTCproto"
+          - "2dust"
+      release_archives:
+        description: enable release archives
+        type: boolean
+
+concurrency:
+  group: ${{ github.workflow }}
 
 jobs:
   build:
@@ -73,8 +76,8 @@ jobs:
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'
-          java-version: '21'
+          distribution: "temurin"
+          java-version: "21"
       - name: java version
         run: |
           java --version
@@ -82,7 +85,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.22'
+          go-version: "1.22"
       - name: Install gomobile
         run: |
           go install golang.org/x/mobile/cmd/gomobile@latest
@@ -106,7 +109,6 @@ jobs:
           chmod 755 *
           sed -i 's/-XX:MaxPermSize=512m/ /' ${{ github.workspace }}/build/v2rayNG/V2rayNG/gradle.properties
           cat ${{ github.workspace }}/ext/build.gradle.kts > ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/build.gradle.kts
-
 
       - name: edit v2rayNG source code
         if: ${{ inputs.ng_build_gradle == '2dust' }}
@@ -182,7 +184,7 @@ jobs:
       - name: Upload xray exe
         uses: actions/upload-artifact@v4
         with:
-          name: xray
+          name: xray-bin.7z
           compression-level: 9
           path: |
             ${{ github.workspace }}/build/AndroidLibXrayLite/ActionsBuild/Xray-core/build_assets/*
@@ -190,7 +192,7 @@ jobs:
       - name: Upload aar
         uses: actions/upload-artifact@v4
         with:
-          name: aar
+          name: aar.7z
           compression-level: 9
           path: |
             ${{ github.workspace }}/build/AndroidLibXrayLite/*.aar
@@ -198,7 +200,7 @@ jobs:
       - name: Upload arm dev apk
         uses: actions/upload-artifact@v4
         with:
-          name: arm_dev_apks
+          name: arm_dev_apks.7z
           compression-level: 9
           path: |
             ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/build/outputs/apk/**/*.apk
@@ -211,7 +213,34 @@ jobs:
       - name: Upload all dev apk
         uses: actions/upload-artifact@v4
         with:
-          name: all_dev_apks
+          name: all_dev_apks.7z
           compression-level: 9
           path: |
             ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/build/outputs/apk/**/*.apk
+
+  release:
+    needs: [build]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download TEMP archives
+        uses: actions/download-artifact@v4
+        if: ${{ inputs.release_archives }}
+        with:
+          pattern: *_apks.7z
+          merge-multiple: true
+
+      - name: Get current date time
+        run: |
+          echo "current_date_time=$(date +'%Y-%m-%d-%H-%M')" >> "$GITHUB_ENV"
+
+      - name: Release archives
+        uses: softprops/action-gh-release@v2
+        if: ${{ inputs.release_archives }}
+        with:
+          tag_name: "V-${current_date_time}"
+          name: "V-${current_date_time}"
+          token: ${{ secrets.GITHUB_TOKEN }}
+          prerelease: false
+          body: "FFmpeg nonfree build result."
+          files: |
+            ffmpeg-*.7z
