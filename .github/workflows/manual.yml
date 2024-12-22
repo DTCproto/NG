@@ -245,8 +245,8 @@ jobs:
       - name: 7-Zip files binaries
         if: ${{ inputs.release_archives }}
         run: |
-          find ${{ github.workspace }}/temp/ -type f -name "*.apk" | 7z a -mx9 ${{ github.workspace }}/archives/apks_all-V-${{ env.current_date_time }}.7z @-
-          find ${{ github.workspace }}/temp/ -type f -name "*arm64-v8a.apk" | 7z a -mx9 ${{ github.workspace }}/archives/apks_arm_v8a-V-${{ env.current_date_time }}.7z @-
+          find ${{ github.workspace }}/temp/ -type f -name "*.apk" | xargs 7z a -mx9 ${{ github.workspace }}/archives/apks_all-V-${{ env.current_date_time }}.7z
+          find ${{ github.workspace }}/temp/ -type f -name "*arm64-v8a.apk" | xargs 7z a -mx9 ${{ github.workspace }}/archives/apks_arm_v8a-V-${{ env.current_date_time }}.7z
 
       - name: show zip files
         if: ${{ inputs.release_archives }}
