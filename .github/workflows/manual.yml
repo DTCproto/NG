@@ -116,7 +116,7 @@ jobs:
         run: |
           cd ${{ github.workspace }}/build/v2rayNG/V2rayNG
           chmod 755 *
-          sed -i 's/applicationId = "com.v2ray.ang"/applicationId = "com.v2ray.ang.dev"/' ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/build.gradle.kts
+          sed -i 's/applicationId = "com.v2ray.ang"/applicationId = "com.xray.ang.dev"/' ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/build.gradle.kts
 
       - name: import apk sign config
         run: |
