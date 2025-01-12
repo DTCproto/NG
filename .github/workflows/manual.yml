@@ -116,7 +116,6 @@ jobs:
         run: |
           cd ${{ github.workspace }}/build/v2rayNG/V2rayNG
           chmod 755 *
-          sed -i 's/-XX:MaxPermSize=512m/ /' ${{ github.workspace }}/build/v2rayNG/V2rayNG/gradle.properties
           sed -i 's/applicationId = "com.v2ray.ang"/applicationId = "com.v2ray.ang.dev"/' ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/build.gradle.kts
 
       - name: import apk sign config
@@ -176,6 +175,7 @@ jobs:
           gomobile init
           go mod tidy -v
           gomobile bind -v -androidapi 21 -ldflags='-s -w' ./
+          mkdir -p ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/libs
           cp *.aar ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/libs/
 
       - name: Build APK
