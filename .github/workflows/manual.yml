@@ -23,7 +23,6 @@ on:
         options:
           - "DTCproto"
           - "2dust"
-          - "yuhan6665"
       x_lib_branch:
         description: "指定AndroidLibXrayLite分支"
         required: true
@@ -41,7 +40,6 @@ on:
         type: choice
         options:
           - "2dust"
-          - "yuhan6665"
       ng_branch:
         description: "指定v2rayNG分支"
         required: true
@@ -52,14 +50,6 @@ on:
         required: true
         default: "HEAD~0"
         type: string
-      ng_build_gradle:
-        description: "指定v2rayNG使用的build gradle文件仓库"
-        required: true
-        default: "2dust"
-        type: choice
-        options:
-          - "DTCproto"
-          - "2dust"
       release_archives:
         description: "enable release archives"
         default: true
