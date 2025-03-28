@@ -86,7 +86,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: "1.23"
+          go-version: "1.24"
       - name: Install gomobile
         run: |
           go install golang.org/x/mobile/cmd/gomobile@latest
@@ -103,16 +103,7 @@ jobs:
           cd ${{ github.workspace }}/build/v2rayNG
           git reset --hard ${{ inputs.ng_commit_id }}
 
-      - name: edit v2rayNG source code[current]
-        if: ${{ inputs.ng_build_gradle == 'DTCproto' }}
-        run: |
-          cd ${{ github.workspace }}/build/v2rayNG/V2rayNG
-          chmod 755 *
-          sed -i 's/-XX:MaxPermSize=512m/ /' ${{ github.workspace }}/build/v2rayNG/V2rayNG/gradle.properties
-          cat ${{ github.workspace }}/ext/build.gradle.kts > ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/build.gradle.kts
-
       - name: edit v2rayNG source code
-        if: ${{ inputs.ng_build_gradle == '2dust' }}
         run: |
           cd ${{ github.workspace }}/build/v2rayNG/V2rayNG
           chmod 755 *
@@ -120,10 +111,6 @@ jobs:
 
       - name: import apk sign config
         run: |
-          sed '$a\SIGNING_STORE_FILE=./dt.jks'      ${{ github.workspace }}/build/v2rayNG/V2rayNG/gradle.properties -i
-          sed '$a\SIGNING_KEY_ALIAS=dt'             ${{ github.workspace }}/build/v2rayNG/V2rayNG/gradle.properties -i
-          sed '$a\SIGNING_STORE_PASSWORD=dt@pwd'    ${{ github.workspace }}/build/v2rayNG/V2rayNG/gradle.properties -i
-          sed '$a\SIGNING_KEY_PASSWORD=dt@pwd'      ${{ github.workspace }}/build/v2rayNG/V2rayNG/gradle.properties -i
           cp ${{ github.workspace }}/.github/workflows/dt.jks ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/dt.jks
 
       - name: git clone AndroidLibXrayLite
@@ -145,7 +132,6 @@ jobs:
           echo "x_short_version=$(git rev-parse --short HEAD)" >> "$GITHUB_ENV"
 
       - name: edit lib version
-        #if: ${{ inputs.x_lib_repo != 'DTCproto' }}
         run: |
           sed -i 's/var version/\/\/ var version/g' ${{ github.workspace }}/build/AndroidLibXrayLite/libv2ray_main.go
           echo ${{ env.x_short_version }} | xargs -I '{}' sed -i 's/fmt.Sprintf("Lib v%d, Xray-core v%s", version, v2core.Version())/fmt.Sprintf("(Lib)Xray-core v%s", v2core.Version()+"@{}")/g' ${{ github.workspace }}/build/AndroidLibXrayLite/libv2ray_main.go
@@ -165,9 +151,9 @@ jobs:
         run: |
           cd ${{ github.workspace }}/build/AndroidLibXrayLite/ActionsBuild/Xray-core
           mkdir build_assets
-          CGO_ENABLED=0 GOOS=linux GOARCH=amd64  go build -v -o build_assets/xray -trimpath -ldflags "-s -w -buildid=" ./main
-          CGO_ENABLED=0 GOOS=linux GOARCH=arm64  go build -v -o build_assets/xray_arm64 -trimpath -ldflags "-s -w -buildid=" ./main
-          CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -v -o build_assets/xray.exe -trimpath -ldflags "-s -w -buildid=" ./main
+          CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -o build_assets/xray -trimpath -buildvcs=false -ldflags "-s -w -buildid=" ./main
+          CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -v -o build_assets/xray_arm64 -trimpath -buildvcs=false -ldflags "-s -w -buildid=" ./main
+          CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -v -o build_assets/xray.exe -trimpath -buildvcs=false -ldflags "-s -w -buildid=" ./main
 
       - name: Build aar
         run: |
@@ -181,7 +167,7 @@ jobs:
       - name: Build APK
         run: |
           cd ${{ github.workspace }}/build/v2rayNG/V2rayNG
-          ./gradlew assembleRelease
+          ./gradlew assembleRelease -Pandroid.injected.signing.store.file=dt.jks -Pandroid.injected.signing.store.password="dt@pwd" -Pandroid.injected.signing.key.alias="dt" -Pandroid.injected.signing.key.password="dt@pwd"
 
       - name: Upload xray exe
         uses: actions/upload-artifact@v4
