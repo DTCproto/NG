@@ -107,6 +107,7 @@ jobs:
           git clone -b ${{ inputs.ng_branch }} https://github.com/${{ inputs.ng_repo }}/v2rayNG.git
           cd ${{ github.workspace }}/build/v2rayNG
           git reset --hard ${{ inputs.ng_commit_id }}
+          git submodule update --init --recursive
 
       - name: edit v2rayNG source code
         run: |
