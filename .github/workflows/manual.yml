@@ -126,11 +126,11 @@ jobs:
           sed -i 's/var version/\/\/ var version/g' ${{ github.workspace }}/build/AndroidLibXrayLite/libv2ray_main.go
           echo ${{ env.x_short_version }} | xargs -I '{}' sed -i 's/fmt.Sprintf("Lib v%d, Xray-core v%s", version, v2core.Version())/fmt.Sprintf("(Lib)Xray-core v%s", v2core.Version()+"@{}")/g' ${{ github.workspace }}/build/AndroidLibXrayLite/libv2ray_main.go
 
-      - name: fix lib conflict
-        run: |
-          cp -rf ${{ github.workspace }}/ext/nouse.go ${{ github.workspace }}/build/AndroidLibXrayLite
-          cd ${{ github.workspace }}/build/AndroidLibXrayLite
-          go get google.golang.org/genproto@v0.0.0-20241216192217-9240e9c98484
+      #- name: fix lib conflict
+      #  run: |
+      #    cp -rf ${{ github.workspace }}/ext/nouse.go ${{ github.workspace }}/build/AndroidLibXrayLite
+      #    cd ${{ github.workspace }}/build/AndroidLibXrayLite
+      #    go get google.golang.org/genproto@v0.0.0-20241216192217-9240e9c98484
 
       - name: go get specify xray
         run: |
@@ -145,14 +145,24 @@ jobs:
           CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -v -o build_assets/xray_arm64 -trimpath -buildvcs=false -ldflags "-s -w -buildid=" ./main
           CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -v -o build_assets/xray.exe -trimpath -buildvcs=false -ldflags "-s -w -buildid=" ./main
 
-      - name: Build aar
+      - name: Build libv2ray aar
         run: |
           cd ${{ github.workspace }}/build/AndroidLibXrayLite
           gomobile init
           go mod tidy -v
-          gomobile bind -v -androidapi 21 -ldflags='-s -w' ./
+          gomobile bind -v -androidapi 21 -trimpath -ldflags='-s -w -buildid=' ./
           mkdir -p ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/libs
           cp *.aar ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/libs/
+          ls ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/libs/
+
+      - name: Build Other libs
+        run: |
+          cd ${{ github.workspace }}/build/v2rayNG
+          bash compile-tun2socks.sh
+          cp -r ${{ github.workspace }}/build/v2rayNG/libs/* ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/libs/
+          bash libhysteria2.sh
+          cp -r ${{ github.workspace }}/hysteria/libs/* ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/libs/
+          ls ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/libs/
 
       - name: Build APK
         run: |
