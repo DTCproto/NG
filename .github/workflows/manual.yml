@@ -175,19 +175,20 @@ jobs:
           gomobile bind -v -androidapi 21 -trimpath -ldflags='-s -w -buildid=' ./
           mkdir -p ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/libs
           cp *.aar ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/libs/
-          ls ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/libs/
 
       - name: Build Other libs
         run: |
           cd ${{ github.workspace }}/build/v2rayNG
           bash compile-tun2socks.sh
+          ls -al ${{ github.workspace }}/build/v2rayNG/libs/
           cp -r ${{ github.workspace }}/build/v2rayNG/libs/* ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/libs/
           bash libhysteria2.sh
-          cp -r ${{ github.workspace }}/hysteria/libs/* ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/libs/
-          ls ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/libs/
+          ls -al ${{ github.workspace }}/build/v2rayNG/hysteria/libs/
+          cp -r ${{ github.workspace }}/build/v2rayNG/hysteria/libs/* ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/libs/
 
       - name: Build APK
         run: |
+          ls -al ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/libs/
           cd ${{ github.workspace }}/build/v2rayNG/V2rayNG
           ./gradlew assembleRelease -Pandroid.injected.signing.store.file=${{ github.workspace }}/build/v2rayNG/V2rayNG/app/dt.jks -Pandroid.injected.signing.store.password="dt@pwd" -Pandroid.injected.signing.key.alias="dt" -Pandroid.injected.signing.key.password="dt@pwd"
 
