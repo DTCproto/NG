@@ -126,11 +126,12 @@ jobs:
           sed -i 's/var version/\/\/ var version/g' ${{ github.workspace }}/build/AndroidLibXrayLite/libv2ray_main.go
           echo ${{ env.x_short_version }} | xargs -I '{}' sed -i 's/fmt.Sprintf("Lib v%d, Xray-core v%s", version, v2core.Version())/fmt.Sprintf("(Lib)Xray-core v%s", v2core.Version()+"@{}")/g' ${{ github.workspace }}/build/AndroidLibXrayLite/libv2ray_main.go
 
-      #- name: fix lib conflict
-      #  run: |
-      #    cp -rf ${{ github.workspace }}/ext/nouse.go ${{ github.workspace }}/build/AndroidLibXrayLite
-      #    cd ${{ github.workspace }}/build/AndroidLibXrayLite
-      #    go get google.golang.org/genproto@v0.0.0-20241216192217-9240e9c98484
+      - name: fix lib conflict
+        run: |
+          cp -rf ${{ github.workspace }}/ext/nouse.go ${{ github.workspace }}/build/AndroidLibXrayLite
+          cd ${{ github.workspace }}/build/AndroidLibXrayLite
+          go get google.golang.org/genproto@v0.0.0-20250422160041-2d3770c4ea7f
+          go get google.golang.org/genproto/googleapis/rpc@v0.0.0-20250422160041-2d3770c4ea7f
 
       - name: go get specify xray
         run: |
