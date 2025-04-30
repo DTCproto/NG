@@ -18,7 +18,7 @@ on:
       x_lib_repo:
         description: "指定AndroidLibXrayLite仓库"
         required: true
-        default: "2dust"
+        default: "DTCproto"
         type: choice
         options:
           - "DTCproto"
