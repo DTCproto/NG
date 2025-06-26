@@ -39,6 +39,7 @@ on:
         default: "2dust"
         type: choice
         options:
+          - "DTCproto"
           - "2dust"
       ng_branch:
         description: "指定v2rayNG分支"
@@ -112,6 +113,7 @@ jobs:
           sudo apt install tree -y
 
       - name: git clone v2rayNG
+        if: ${{ inputs.ng_repo != 'DTCproto' }}
         run: |
           mkdir -p ${{ github.workspace }}/build
           cd ${{ github.workspace }}/build
@@ -120,11 +122,29 @@ jobs:
           git reset --hard ${{ inputs.ng_commit_id }}
           git submodule update --init --recursive
 
+      - name: git clone v2rayNG(HevTun)
+        if: ${{ inputs.ng_repo == 'DTCproto' }}
+        run: |
+          mkdir -p ${{ github.workspace }}/build
+          cd ${{ github.workspace }}/build
+          git clone -b 'hev-tun' https://github.com/${{ inputs.ng_repo }}/v2rayNG.git
+          cd ${{ github.workspace }}/build/v2rayNG
+          git reset --hard ${{ inputs.ng_commit_id }}
+          git submodule update --init --recursive
+
       - name: edit v2rayNG source code
+        if: ${{ inputs.ng_repo != 'DTCproto' }}
         run: |
           cd ${{ github.workspace }}/build/v2rayNG/V2rayNG
           chmod 755 *
           sed -i 's/applicationId = "com.v2ray.ang"/applicationId = "com.xray.ang.dev"/' ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/build.gradle.kts
+
+      - name: edit v2rayNG source code(HevTun)
+        if: ${{ inputs.ng_repo == 'DTCproto' }}
+        run: |
+          cd ${{ github.workspace }}/build/v2rayNG/V2rayNG
+          chmod 755 *
+          sed -i 's/applicationId = "com.v2ray.ang"/applicationId = "com.xray.ang.hev.dev"/' ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/build.gradle.kts
 
       - name: add v2rayNG ndk version
         run: |
@@ -188,11 +208,20 @@ jobs:
           cp *.aar ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/libs/
 
       - name: Build Other libs
+        if: ${{ inputs.ng_repo != 'DTCproto' }}
         run: |
           cd ${{ github.workspace }}/build/v2rayNG
           bash compile-tun2socks.sh
           tree ${{ github.workspace }}/build/v2rayNG/libs/
           cp -r ${{ github.workspace }}/build/v2rayNG/libs/* ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/libs/
+          bash libhysteria2.sh
+          tree ${{ github.workspace }}/build/v2rayNG/hysteria/libs/
+          cp -r ${{ github.workspace }}/build/v2rayNG/hysteria/libs/* ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/libs/
+
+      - name: Build Other libs(HevTun)
+        if: ${{ inputs.ng_repo == 'DTCproto' }}
+        run: |
+          cd ${{ github.workspace }}/build/v2rayNG
           bash libhysteria2.sh
           tree ${{ github.workspace }}/build/v2rayNG/hysteria/libs/
           cp -r ${{ github.workspace }}/build/v2rayNG/hysteria/libs/* ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/libs/
