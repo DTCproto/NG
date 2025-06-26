@@ -261,6 +261,7 @@ jobs:
             !${{ github.workspace }}/**/*mips*
             !${{ github.workspace }}/**/*armeabi*
             !${{ github.workspace }}/**/*universal*
+            !${{ github.workspace }}/**/*fdroid*
 
       - name: Upload all dev apk
         uses: actions/upload-artifact@v4
