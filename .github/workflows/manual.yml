@@ -320,6 +320,6 @@ jobs:
           name: "V-${{ env.current_date_time }}"
           token: ${{ secrets.GITHUB_TOKEN }}
           prerelease: false
-          body: "V2rayNG(Xray) build result."
+          body: "V2rayNG(Xray) build result. (NG from ${{ inputs.ng_repo }})"
           files: |
             ${{ github.workspace }}/archives/**
