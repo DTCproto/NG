@@ -28,15 +28,10 @@ on:
         required: true
         default: "main"
         type: string
-      x_lib_commit_id:
-        description: "指定AndroidLibXrayLite使用commit id版本"
-        required: true
-        default: "HEAD~0"
-        type: string
       ng_repo:
         description: "指定v2rayNG仓库"
         required: true
-        default: "2dust"
+        default: "DTCproto"
         type: choice
         options:
           - "DTCproto"
@@ -44,8 +39,11 @@ on:
       ng_branch:
         description: "指定v2rayNG分支"
         required: true
-        default: "master"
-        type: string
+        default: "hev-tun"
+        type: choice
+        options:
+          - "master"
+          - "hev-tun"
       ng_commit_id:
         description: "指定v2rayNG使用commit id版本"
         required: true
@@ -113,7 +111,6 @@ jobs:
           sudo apt install tree -y
 
       - name: git clone v2rayNG
-        if: ${{ inputs.ng_repo != 'DTCproto' }}
         run: |
           mkdir -p ${{ github.workspace }}/build
           cd ${{ github.workspace }}/build
@@ -122,25 +119,15 @@ jobs:
           git reset --hard ${{ inputs.ng_commit_id }}
           git submodule update --init --recursive
 
-      - name: git clone v2rayNG(HevTun)
-        if: ${{ inputs.ng_repo == 'DTCproto' }}
-        run: |
-          mkdir -p ${{ github.workspace }}/build
-          cd ${{ github.workspace }}/build
-          git clone -b 'hev-tun' https://github.com/${{ inputs.ng_repo }}/v2rayNG.git
-          cd ${{ github.workspace }}/build/v2rayNG
-          git reset --hard ${{ inputs.ng_commit_id }}
-          git submodule update --init --recursive
-
       - name: edit v2rayNG source code
-        if: ${{ inputs.ng_repo != 'DTCproto' }}
+        if: ${{ inputs.ng_branch != 'hev-tun' }}
         run: |
           cd ${{ github.workspace }}/build/v2rayNG/V2rayNG
           chmod 755 *
           sed -i 's/applicationId = "com.v2ray.ang"/applicationId = "com.xray.ang.dev"/' ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/build.gradle.kts
 
       - name: edit v2rayNG source code(HevTun)
-        if: ${{ inputs.ng_repo == 'DTCproto' }}
+        if: ${{ inputs.ng_branch == 'hev-tun' }}
         run: |
           cd ${{ github.workspace }}/build/v2rayNG/V2rayNG
           chmod 755 *
@@ -159,8 +146,6 @@ jobs:
           mkdir -p ${{ github.workspace }}/build
           cd ${{ github.workspace }}/build
           git clone -b ${{ inputs.x_lib_branch }} https://github.com/${{ inputs.x_lib_repo }}/AndroidLibXrayLite.git
-          cd ${{ github.workspace }}/build/AndroidLibXrayLite
-          git reset --hard ${{ inputs.x_lib_commit_id }}
 
       - name: use git remote repo xray
         run: |
@@ -208,7 +193,7 @@ jobs:
           cp *.aar ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/libs/
 
       - name: Build Other libs
-        if: ${{ inputs.ng_repo != 'DTCproto' }}
+        if: ${{ inputs.ng_branch != 'hev-tun' }}
         run: |
           cd ${{ github.workspace }}/build/v2rayNG
           bash compile-tun2socks.sh
@@ -219,7 +204,7 @@ jobs:
           cp -r ${{ github.workspace }}/build/v2rayNG/hysteria/libs/* ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/libs/
 
       - name: Build Other libs(HevTun)
-        if: ${{ inputs.ng_repo == 'DTCproto' }}
+        if: ${{ inputs.ng_branch == 'hev-tun' }}
         run: |
           cd ${{ github.workspace }}/build/v2rayNG
           bash libhysteria2.sh
@@ -322,6 +307,6 @@ jobs:
           name: "V-${{ env.current_date_time }}"
           token: ${{ secrets.GITHUB_TOKEN }}
           prerelease: false
-          body: "V2rayNG(Xray) build result. (NG from ${{ inputs.ng_repo }})"
+          body: "V2rayNG(Xray) build result. (NG from ${{ inputs.ng_repo }}[${{ inputs.ng_branch }}])"
           files: |
             ${{ github.workspace }}/archives/**
