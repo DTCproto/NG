@@ -270,6 +270,8 @@ jobs:
           compression-level: 9
           path: |
             ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/build/outputs/apk/**/*.apk
+            !${{ github.workspace }}/**/*null*
+            !${{ github.workspace }}/**/*fdroid*
 
   release:
     needs: [build]
