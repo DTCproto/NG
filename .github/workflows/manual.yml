@@ -49,6 +49,10 @@ on:
         required: true
         default: "HEAD~0"
         type: string
+      build_xray_elf:
+        description: "build xray"
+        default: false
+        type: boolean
       release_archives:
         description: "enable release archives"
         default: true
@@ -176,6 +180,7 @@ jobs:
           go get github.com/xtls/xray-core@${{ env.x_short_version }}
 
       - name: Build xray
+        if: ${{ inputs.build_xray_elf }}
         run: |
           cd ${{ github.workspace }}/build/AndroidLibXrayLite/ActionsBuild/Xray-core
           mkdir build_assets
