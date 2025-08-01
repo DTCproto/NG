@@ -108,6 +108,7 @@ jobs:
             --channel=3 \
             --install "ndk;29.0.13113456"
           echo "NDK_HOME=$ANDROID_HOME/ndk/29.0.13113456" >> "$GITHUB_ENV"
+          echo "ANDROID_NDK_HOME=$ANDROID_HOME/ndk/29.0.13113456" >> "$GITHUB_ENV"
           echo "use_ndk_version=29.0.13113456" >> "$GITHUB_ENV"
 
       - name: Install System Tools
@@ -120,7 +121,7 @@ jobs:
           cd ${{ github.workspace }}/build
           git clone -b ${{ inputs.ng_branch }} https://github.com/${{ inputs.ng_repo }}/v2rayNG.git
           cd ${{ github.workspace }}/build/v2rayNG
-          git reset --hard ${{ inputs.ng_commit_id }}
+          git checkout --force --quiet ${{ inputs.ng_commit_id }}
           git submodule update --init --recursive
 
       - name: edit v2rayNG source code
@@ -158,7 +159,7 @@ jobs:
           rm -rf Xray-core
           git clone -b ${{ inputs.x_branch }} https://github.com/XTLS/Xray-core.git
           cd ${{ github.workspace }}/build/AndroidLibXrayLite/ActionsBuild/Xray-core
-          git reset --hard ${{ inputs.x_commit_id }}
+          git checkout --force --quiet ${{ inputs.x_commit_id }}
           echo "x_short_version=$(git rev-parse --short HEAD)" >> "$GITHUB_ENV"
 
       - name: edit lib version
