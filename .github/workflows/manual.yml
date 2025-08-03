@@ -270,6 +270,7 @@ jobs:
             !${{ github.workspace }}/**/*fdroid*
 
   release:
+    if: ${{ inputs.release_archives }}
     needs: [build]
     runs-on: ubuntu-latest
     permissions:
@@ -288,31 +289,26 @@ jobs:
 
       - name: Download TEMP archives
         uses: actions/download-artifact@v4
-        if: ${{ inputs.release_archives }}
         with:
           pattern: "apks_all*"
           merge-multiple: true
           path: ${{ github.workspace }}/temp
 
       - name: show down files
-        if: ${{ inputs.release_archives }}
         run: |
           tree ${{ github.workspace }}/temp
 
       - name: 7-Zip files binaries
-        if: ${{ inputs.release_archives }}
         run: |
           find ${{ github.workspace }}/temp/ -type f -name "*.apk" | xargs 7z a -mx9 ${{ github.workspace }}/archives/apks_all-V-${{ env.current_date_time }}.7z
           find ${{ github.workspace }}/temp/ -type f -name "*arm64-v8a.apk" | xargs 7z a -mx9 ${{ github.workspace }}/archives/apks_arm_v8a-V-${{ env.current_date_time }}.7z
 
       - name: show zip files
-        if: ${{ inputs.release_archives }}
         run: |
           tree ${{ github.workspace }}/archives
 
       - name: Release archives
         uses: softprops/action-gh-release@v2
-        if: ${{ inputs.release_archives }}
         with:
           tag_name: "V-${{ env.current_date_time }}"
           name: "V-${{ env.current_date_time }}"
