@@ -49,6 +49,11 @@ on:
         required: true
         default: "HEAD~0"
         type: string
+      ndk_version:
+        description: "NDK version"
+        required: true
+        default: "29.0.13846066"
+        type: string
       build_xray_elf:
         description: "build xray"
         default: false
@@ -106,10 +111,9 @@ jobs:
         run: |
           echo "y" | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager \
             --channel=3 \
-            --install "ndk;29.0.13113456"
-          echo "NDK_HOME=$ANDROID_HOME/ndk/29.0.13113456" >> "$GITHUB_ENV"
-          echo "ANDROID_NDK_HOME=$ANDROID_HOME/ndk/29.0.13113456" >> "$GITHUB_ENV"
-          echo "use_ndk_version=29.0.13113456" >> "$GITHUB_ENV"
+            --install "ndk;${{ inputs.ndk_version }}"
+          echo "NDK_HOME=$ANDROID_HOME/ndk/${{ inputs.ndk_version }}" >> "$GITHUB_ENV"
+          echo "ANDROID_NDK_HOME=$ANDROID_HOME/ndk/${{ inputs.ndk_version }}" >> "$GITHUB_ENV"
 
       - name: Install System Tools
         run: |
@@ -140,7 +144,7 @@ jobs:
 
       - name: add v2rayNG ndk version
         run: |
-          sed -i $'10i\\\n    ndkVersion = "${{ env.use_ndk_version }}"' ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/build.gradle.kts
+          sed -i $'10i\\\n    ndkVersion = "${{ inputs.ndk_version }}"' ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/build.gradle.kts
 
       - name: import apk sign config
         run: |
