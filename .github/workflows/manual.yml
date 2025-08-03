@@ -202,24 +202,24 @@ jobs:
           mkdir -p ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/libs
           cp *.aar ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/libs/
 
-      - name: Build Other libs
+      - name: Build ext libs(hysteria)
+        run: |
+          cd ${{ github.workspace }}/build/v2rayNG
+          bash libhysteria2.sh
+          tree ${{ github.workspace }}/build/v2rayNG/hysteria/libs/
+          cp -r ${{ github.workspace }}/build/v2rayNG/hysteria/libs/* ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/libs/
+
+      - name: Build ext libs(badvpn)
         if: ${{ inputs.ng_branch != 'hev-tun' }}
         run: |
           cd ${{ github.workspace }}/build/v2rayNG
           bash compile-tun2socks.sh
           tree ${{ github.workspace }}/build/v2rayNG/libs/
           cp -r ${{ github.workspace }}/build/v2rayNG/libs/* ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/libs/
-          bash libhysteria2.sh
-          tree ${{ github.workspace }}/build/v2rayNG/hysteria/libs/
-          cp -r ${{ github.workspace }}/build/v2rayNG/hysteria/libs/* ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/libs/
 
-      - name: Build Other libs(HevTun)
-        if: ${{ inputs.ng_branch == 'hev-tun' }}
-        run: |
-          cd ${{ github.workspace }}/build/v2rayNG
-          bash libhysteria2.sh
-          tree ${{ github.workspace }}/build/v2rayNG/hysteria/libs/
-          cp -r ${{ github.workspace }}/build/v2rayNG/hysteria/libs/* ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/libs/
+      #- name: Build ext libs(hev-tun)
+      #  if: ${{ inputs.ng_branch == 'hev-tun' }}
+      #  run: |
 
       - name: Build APK
         run: |
