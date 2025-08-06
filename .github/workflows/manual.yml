@@ -24,9 +24,16 @@ on:
           - "DTCproto"
           - "2dust"
       x_lib_branch:
-        description: "指定AndroidLibXrayLite分支"
+        description: "指定~XrayLite分支"
         required: true
         default: "main"
+        type: choice
+        options:
+          - "main"
+      x_lib_commit_id:
+        description: "指定~XrayLite使用commit id版本"
+        required: true
+        default: "HEAD~0"
         type: string
       ng_repo:
         description: "指定v2rayNG仓库"
@@ -160,6 +167,8 @@ jobs:
           mkdir -p ${{ github.workspace }}/build
           cd ${{ github.workspace }}/build
           git clone -b ${{ inputs.x_lib_branch }} https://github.com/${{ inputs.x_lib_repo }}/AndroidLibXrayLite.git
+          cd ${{ github.workspace }}/build/AndroidLibXrayLite
+          git checkout --force --quiet ${{ inputs.x_lib_commit_id }}
 
       - name: use git remote repo xray
         run: |
