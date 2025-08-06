@@ -31,7 +31,7 @@ on:
       ng_repo:
         description: "指定v2rayNG仓库"
         required: true
-        default: "DTCproto"
+        default: "2dust"
         type: choice
         options:
           - "DTCproto"
@@ -39,20 +39,14 @@ on:
       ng_branch:
         description: "指定v2rayNG分支"
         required: true
-        default: "hev-tun"
+        default: "master"
         type: choice
         options:
           - "master"
-          - "hev-tun"
       ng_commit_id:
         description: "指定v2rayNG使用commit id版本"
         required: true
         default: "HEAD~0"
-        type: string
-      ndk_version:
-        description: "NDK version"
-        required: true
-        default: "29.0.13846066"
         type: string
       build_xray_elf:
         description: "build xray"
@@ -100,6 +94,11 @@ jobs:
       #- name: Set up Gradle
       #  uses: gradle/actions/setup-gradle@v4
 
+      - name: set version
+        run: |
+          echo "ndk_version=29.0.13846066" >> "$GITHUB_ENV"
+          echo "genproto_version=v0.0.0-20250422160041-2d3770c4ea7f" >> "$GITHUB_ENV"
+
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
         with:
@@ -109,11 +108,10 @@ jobs:
 
       - name: Install NDK
         run: |
-          echo "y" | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager \
-            --channel=3 \
-            --install "ndk;${{ inputs.ndk_version }}"
-          echo "NDK_HOME=$ANDROID_HOME/ndk/${{ inputs.ndk_version }}" >> "$GITHUB_ENV"
-          echo "ANDROID_NDK_HOME=$ANDROID_HOME/ndk/${{ inputs.ndk_version }}" >> "$GITHUB_ENV"
+          echo "y" | ${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager \
+            --channel=0 \
+            --install "ndk;${{ env.ndk_version }}"
+          echo "NDK_HOME=${ANDROID_HOME}/ndk/${{ env.ndk_version }}" >> "$GITHUB_ENV"
 
       - name: Install System Tools
         run: |
@@ -128,23 +126,26 @@ jobs:
           git checkout --force --quiet ${{ inputs.ng_commit_id }}
           git submodule update --init --recursive
 
-      - name: edit v2rayNG source code
-        if: ${{ inputs.ng_branch != 'hev-tun' }}
+      - name: fix Gradle Pre
         run: |
           cd ${{ github.workspace }}/build/v2rayNG/V2rayNG
-          chmod 755 *
-          sed -i 's/applicationId = "com.v2ray.ang"/applicationId = "com.xray.ang.dev"/' ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/build.gradle.kts
+          echo "sdk.dir=${ANDROID_HOME}" > local.properties
+          chmod +x gradlew
 
-      - name: edit v2rayNG source code(HevTun)
-        if: ${{ inputs.ng_branch == 'hev-tun' }}
+      - name: edit v2rayNG applicationId(x.hev.dev)
         run: |
           cd ${{ github.workspace }}/build/v2rayNG/V2rayNG
           chmod 755 *
           sed -i 's/applicationId = "com.v2ray.ang"/applicationId = "com.xray.ang.hev.dev"/' ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/build.gradle.kts
 
+      - name: fix v2rayNG libs version(mmkv)
+        run: |
+          cd ${{ github.workspace }}/build/v2rayNG/V2rayNG
+          sed -i 's/mmkvStatic = "1.3.12"/mmkvStatic = "1.3.14"/' ${{ github.workspace }}/build/v2rayNG/V2rayNG/gradle/libs.versions.toml
+
       - name: add v2rayNG ndk version
         run: |
-          sed -i $'10i\\\n    ndkVersion = "${{ inputs.ndk_version }}"' ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/build.gradle.kts
+          sed -i $'10i\\\n    ndkVersion = "${{ env.ndk_version }}"' ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/build.gradle.kts
 
       - name: import apk sign config
         run: |
@@ -176,8 +177,8 @@ jobs:
         run: |
           cp -rf ${{ github.workspace }}/ext/nouse.go ${{ github.workspace }}/build/AndroidLibXrayLite
           cd ${{ github.workspace }}/build/AndroidLibXrayLite
-          go get google.golang.org/genproto@v0.0.0-20250422160041-2d3770c4ea7f
-          go get google.golang.org/genproto/googleapis/rpc@v0.0.0-20250422160041-2d3770c4ea7f
+          go get google.golang.org/genproto@${{ env.genproto_version }}
+          go get google.golang.org/genproto/googleapis/rpc@${{ env.genproto_version }}
 
       - name: go get specify xray
         run: |
@@ -209,17 +210,12 @@ jobs:
           tree ${{ github.workspace }}/build/v2rayNG/hysteria/libs/
           cp -r ${{ github.workspace }}/build/v2rayNG/hysteria/libs/* ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/libs/
 
-      - name: Build ext libs(badvpn)
-        if: ${{ inputs.ng_branch != 'hev-tun' }}
+      - name: Build ext libs(tun2socks)
         run: |
           cd ${{ github.workspace }}/build/v2rayNG
           bash compile-tun2socks.sh
           tree ${{ github.workspace }}/build/v2rayNG/libs/
           cp -r ${{ github.workspace }}/build/v2rayNG/libs/* ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/libs/
-
-      #- name: Build ext libs(hev-tun)
-      #  if: ${{ inputs.ng_branch == 'hev-tun' }}
-      #  run: |
 
       - name: Build APK
         run: |
