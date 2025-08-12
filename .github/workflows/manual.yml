@@ -297,7 +297,7 @@ jobs:
           sudo apt install tree -y
 
       - name: Download TEMP archives
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           pattern: "apks_all*"
           merge-multiple: true
