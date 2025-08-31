@@ -76,7 +76,7 @@ jobs:
       attestations: write
       id-token: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           submodules: 'true'
 
@@ -104,7 +104,7 @@ jobs:
       - name: set version
         run: |
           echo "ndk_version=29.0.13846066" >> "$GITHUB_ENV"
-          echo "genproto_version=v0.0.0-20250422160041-2d3770c4ea7f" >> "$GITHUB_ENV"
+          echo "genproto_version=v0.0.0-20250707201910-8d1bb00bc6a7" >> "$GITHUB_ENV"
           echo "cmdline_tools_version=12266719" >> "$GITHUB_ENV"
           echo "platforms_short_version=35" >> "$GITHUB_ENV"
           echo "platforms_full_version=35.0.0" >> "$GITHUB_ENV"
