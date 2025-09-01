@@ -188,7 +188,6 @@ jobs:
       - name: edit lib version
         run: |
           sed -i 's/var version/\/\/ var version/g' ${{ github.workspace }}/build/AndroidLibXrayLite/libv2ray_main.go
-          echo ${{ env.x_short_version }} | xargs -I '{}' sed -i 's/fmt.Sprintf("Lib v%d, Xray-core v%s", version, v2core.Version())/fmt.Sprintf("(Lib)Xray-core v%s", v2core.Version()+"@{}")/g' ${{ github.workspace }}/build/AndroidLibXrayLite/libv2ray_main.go
           echo ${{ env.x_short_version }} | xargs -I '{}' sed -i 's/fmt.Sprintf("Lib v%d, Xray-core v%s", version, core.Version())/fmt.Sprintf("(Lib)Xray-core v%s", core.Version()+"@{}")/g' ${{ github.workspace }}/build/AndroidLibXrayLite/libv2ray_main.go
 
       - name: fix lib conflict
