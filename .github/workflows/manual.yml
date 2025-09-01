@@ -220,7 +220,10 @@ jobs:
         run: |
           cd ${{ github.workspace }}/build/AndroidLibXrayLite/ActionsBuild/Xray-core/build_assets
           for bin_dir in */; do
-            zip -r "${bin_dir%/}.zip" "$bin_dir"
+            cd ${bin_dir}
+            touch -mt $(date +%Y01010000) *
+            zip -9vr ../${bin_dir%/}.zip .
+            cd ../
           done
           tree ${{ github.workspace }}/build/AndroidLibXrayLite/ActionsBuild/Xray-core/build_assets
 
