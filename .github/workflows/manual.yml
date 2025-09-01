@@ -179,6 +179,7 @@ jobs:
           cd ${{ github.workspace }}/build/AndroidLibXrayLite/ActionsBuild/Xray-core
           git checkout --force --quiet ${{ inputs.x_commit_id }}
           echo "x_short_version=$(git rev-parse --short HEAD)" >> "$GITHUB_ENV"
+          echo "x_describe_version=$(git describe --always --dirty)" >> "$GITHUB_ENV"
 
       - name: edit lib version
         run: |
@@ -197,15 +198,25 @@ jobs:
         run: |
           cd ${{ github.workspace }}/build/AndroidLibXrayLite
           go get github.com/xtls/xray-core@${{ env.x_short_version }}
+          go mod tidy
 
       - name: Build xray exe
         if: ${{ inputs.build_xray_elf }}
         run: |
           cd ${{ github.workspace }}/build/AndroidLibXrayLite/ActionsBuild/Xray-core
-          mkdir build_assets
-          CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -o build_assets/xray -trimpath -buildvcs=false -ldflags "-s -w -buildid=" ./main
-          CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -v -o build_assets/xray_arm64 -trimpath -buildvcs=false -ldflags "-s -w -buildid=" ./main
-          CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -v -o build_assets/xray.exe -trimpath -buildvcs=false -ldflags "-s -w -buildid=" ./main
+          echo 'Building Xray for windows(amd64)'
+          mkdir -p build_assets/Xray-windows-64
+          CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -o build_assets/Xray-windows-64/xray.exe -trimpath -buildvcs=false -gcflags="all=-l=4" -ldflags="-X github.com/xtls/xray-core/core.build=${{ env.x_describe_version }} -s -w -buildid=" -v ./main
+          zip -r Xray-windows-64.zip Xray-windows-64
+          echo 'Building Xray for linux(amd64)'
+          mkdir -p build_assets/Xray-linux-64
+          CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o build_assets/Xray-linux-64/xray -trimpath -buildvcs=false -gcflags="all=-l=4" -ldflags="-X github.com/xtls/xray-core/core.build=${{ env.x_describe_version }} -s -w -buildid=" -v ./main
+          zip -r Xray-linux-64.zip Xray-linux-64
+          echo 'Building Xray for linux(arm64)'
+          mkdir -p build_assets/Xray-linux-arm64-v8a
+          CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -o build_assets/Xray-linux-arm64-v8a/xray -trimpath -buildvcs=false -gcflags="all=-l=4" -ldflags="-X github.com/xtls/xray-core/core.build=${{ env.x_describe_version }} -s -w -buildid=" -v ./main
+          zip -r Xray-linux-arm64-v8a.zip Xray-linux-arm64-v8a
+          tree ${{ github.workspace }}/build/AndroidLibXrayLite/ActionsBuild/Xray-core/build_assets
 
       - name: Build libv2ray aar
         run: |
@@ -243,7 +254,7 @@ jobs:
           name: bin-${{ env.x_short_version }}
           compression-level: 9
           path: |
-            ${{ github.workspace }}/build/AndroidLibXrayLite/ActionsBuild/Xray-core/build_assets/*
+            ${{ github.workspace }}/build/AndroidLibXrayLite/ActionsBuild/Xray-core/build_assets/*.zip
 
       - name: Upload aar
         uses: actions/upload-artifact@v4
@@ -296,23 +307,41 @@ jobs:
         run: |
           sudo apt install tree -y
 
-      - name: Download TEMP archives
+      - name: Download apks archives
         uses: actions/download-artifact@v5
         with:
           pattern: "apks_all*"
           merge-multiple: true
-          path: ${{ github.workspace }}/temp
+          path: ${{ github.workspace }}/apks
 
-      - name: show down files
+      - name: show apks files
         run: |
-          tree ${{ github.workspace }}/temp
+          tree ${{ github.workspace }}/apks
 
-      - name: 7-Zip files binaries
+      - name: apks binaries
         run: |
-          find ${{ github.workspace }}/temp/ -type f -name "*.apk" | xargs 7z a -mx9 ${{ github.workspace }}/archives/apks_all-V-${{ env.current_date_time }}.7z
-          find ${{ github.workspace }}/temp/ -type f -name "*arm64-v8a.apk" | xargs 7z a -mx9 ${{ github.workspace }}/archives/apks_arm_v8a-V-${{ env.current_date_time }}.7z
+          find ${{ github.workspace }}/apks/ -type f -name "*.apk" | xargs 7z a -mx9 ${{ github.workspace }}/archives/apks_all-V-${{ env.current_date_time }}.7z
+          find ${{ github.workspace }}/apks/ -type f -name "*arm64-v8a.apk" | xargs 7z a -mx9 ${{ github.workspace }}/archives/apks_arm_v8a-V-${{ env.current_date_time }}.7z
 
-      - name: show zip files
+      - name: Download bin archives
+        uses: actions/download-artifact@v5
+        if: ${{ inputs.build_xray_elf }}
+        with:
+          pattern: "bin*"
+          merge-multiple: true
+          path: ${{ github.workspace }}/bin
+
+      - name: show bin files
+        if: ${{ inputs.build_xray_elf }}
+        run: |
+          tree ${{ github.workspace }}/bin
+
+      - name: bin binaries
+        if: ${{ inputs.build_xray_elf }}
+        run: |
+          mv ${{ github.workspace }}/bin/*.zip ${{ github.workspace }}/archives/
+
+      - name: show archives files
         run: |
           tree ${{ github.workspace }}/archives
 
