@@ -75,6 +75,8 @@ jobs:
       packages: write
       attestations: write
       id-token: write
+    outputs:
+      xray_short_commit_id: ${{ steps.set_global_params.outputs.xray_short_commit_id }}
     steps:
       - uses: actions/checkout@v5
         with:
@@ -171,6 +173,7 @@ jobs:
           git checkout --force --quiet ${{ inputs.x_lib_commit_id }}
 
       - name: use git remote repo xray
+        id: set_global_params
         run: |
           mkdir -p ${{ github.workspace }}/build/AndroidLibXrayLite/ActionsBuild
           cd ${{ github.workspace }}/build/AndroidLibXrayLite/ActionsBuild
@@ -180,6 +183,7 @@ jobs:
           git checkout --force --quiet ${{ inputs.x_commit_id }}
           echo "x_short_version=$(git rev-parse --short HEAD)" >> "$GITHUB_ENV"
           echo "x_describe_version=$(git describe --always --dirty)" >> "$GITHUB_ENV"
+          echo "xray_short_commit_id=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
 
       - name: edit lib version
         run: |
@@ -361,6 +365,9 @@ jobs:
           name: "V-${{ env.current_date_time }}"
           token: ${{ secrets.GITHUB_TOKEN }}
           prerelease: false
-          body: "V2rayNG(Xray) build result. (NG from ${{ inputs.ng_repo }}[${{ inputs.ng_branch }}])"
+          body: |
+            V2rayNG(Xray) build result. 
+            Xray from [${{ inputs.x_branch }}] [${{ needs.build.outputs.xray_short_commit_id }}]
+            NG from [${{ inputs.ng_repo }}] [${{ inputs.ng_branch }}]
           files: |
             ${{ github.workspace }}/archives/**
