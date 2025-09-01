@@ -200,22 +200,28 @@ jobs:
           go get github.com/xtls/xray-core@${{ env.x_short_version }}
           go mod tidy
 
-      - name: Build xray exe
+      - name: Build xray elf
         if: ${{ inputs.build_xray_elf }}
         run: |
           cd ${{ github.workspace }}/build/AndroidLibXrayLite/ActionsBuild/Xray-core
           echo 'Building Xray for windows(amd64)'
           mkdir -p build_assets/Xray-windows-64
           CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -o build_assets/Xray-windows-64/xray.exe -trimpath -buildvcs=false -gcflags="all=-l=4" -ldflags="-X github.com/xtls/xray-core/core.build=${{ env.x_describe_version }} -s -w -buildid=" -v ./main
-          zip -r Xray-windows-64.zip Xray-windows-64
           echo 'Building Xray for linux(amd64)'
           mkdir -p build_assets/Xray-linux-64
           CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o build_assets/Xray-linux-64/xray -trimpath -buildvcs=false -gcflags="all=-l=4" -ldflags="-X github.com/xtls/xray-core/core.build=${{ env.x_describe_version }} -s -w -buildid=" -v ./main
-          zip -r Xray-linux-64.zip Xray-linux-64
           echo 'Building Xray for linux(arm64)'
           mkdir -p build_assets/Xray-linux-arm64-v8a
           CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -o build_assets/Xray-linux-arm64-v8a/xray -trimpath -buildvcs=false -gcflags="all=-l=4" -ldflags="-X github.com/xtls/xray-core/core.build=${{ env.x_describe_version }} -s -w -buildid=" -v ./main
-          zip -r Xray-linux-arm64-v8a.zip Xray-linux-arm64-v8a
+          tree ${{ github.workspace }}/build/AndroidLibXrayLite/ActionsBuild/Xray-core/build_assets
+ 
+      - name: zip xray elf
+        if: ${{ inputs.build_xray_elf }}
+        run: |
+          cd ${{ github.workspace }}/build/AndroidLibXrayLite/ActionsBuild/Xray-core/build_assets
+          for bin_dir in */; do
+            zip -r "${bin_dir%/}.zip" "$bin_dir"
+          done
           tree ${{ github.workspace }}/build/AndroidLibXrayLite/ActionsBuild/Xray-core/build_assets
 
       - name: Build libv2ray aar
