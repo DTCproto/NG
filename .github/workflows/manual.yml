@@ -41,7 +41,6 @@ on:
         default: "2dust"
         type: choice
         options:
-          - "DTCproto"
           - "2dust"
       ng_branch:
         description: "指定v2rayNG分支"
