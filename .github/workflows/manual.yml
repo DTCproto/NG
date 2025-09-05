@@ -56,7 +56,7 @@ on:
         type: string
       build_xray_elf:
         description: "build xray"
-        default: false
+        default: true
         type: boolean
       release_archives:
         description: "enable release archives"
