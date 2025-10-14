@@ -3,13 +3,6 @@ name: BUILD_APK_BY_MANUAL
 on:
   workflow_dispatch:
     inputs:
-      x_branch:
-        description: "指定Xray-core分支"
-        required: true
-        default: "main"
-        type: choice
-        options:
-          - "main"
       x_commit_id:
         description: "指定Xray-core使用commit id版本"
         required: true
@@ -30,30 +23,20 @@ on:
         type: choice
         options:
           - "main"
-      x_lib_commit_id:
-        description: "指定~XrayLite使用commit id版本"
-        required: true
-        default: "HEAD~0"
-        type: string
-      ng_repo:
-        description: "指定v2rayNG仓库"
-        required: true
-        default: "2dust"
-        type: choice
-        options:
-          - "2dust"
-      ng_branch:
-        description: "指定v2rayNG分支"
-        required: true
-        default: "master"
-        type: choice
-        options:
-          - "master"
       ng_commit_id:
         description: "指定v2rayNG使用commit id版本"
         required: true
         default: "HEAD~0"
         type: string
+      hevtun_commit_id:
+        description: "指定HevTun使用commit id版本"
+        required: true
+        default: "HEAD~0"
+        type: string
+      specify_hevtun:
+        description: "specify HevTun version"
+        default: true
+        type: boolean
       build_xray_elf:
         description: "build xray"
         default: true
@@ -67,8 +50,33 @@ concurrency:
   group: ${{ github.workflow }}
 
 jobs:
+  pre:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+      attestations: write
+      id-token: write
+    outputs:
+      x_branch: ${{ steps.set_global_params.outputs.x_branch }}
+      ng_repo: "2dust"
+      ng_branch: "master"
+      hevtun_branch: "main"
+      default_commit_id: "HEAD~0"
+      ndk_version: "29.0.14206865"
+      genproto_version: "v0.0.0-20250707201910-8d1bb00bc6a7"
+      cmdline_tools_version: "13114758"
+      platforms_short_version: "36"
+      platforms_full_version: "36.1.0"
+    steps:
+      - name: set global params
+        id: set_global_params
+        run: |
+          echo "x_branch=main" >> "$GITHUB_OUTPUT"
+
   build:
     runs-on: ubuntu-latest
+    needs: [pre]
     permissions:
       contents: write
       packages: write
@@ -103,28 +111,20 @@ jobs:
       #- name: Set up Gradle
       #  uses: gradle/actions/setup-gradle@v4
 
-      - name: set version
-        run: |
-          echo "ndk_version=29.0.14206865" >> "$GITHUB_ENV"
-          echo "genproto_version=v0.0.0-20250707201910-8d1bb00bc6a7" >> "$GITHUB_ENV"
-          echo "cmdline_tools_version=13114758" >> "$GITHUB_ENV"
-          echo "platforms_short_version=36" >> "$GITHUB_ENV"
-          echo "platforms_full_version=36.1.0" >> "$GITHUB_ENV"
-
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
         with:
           log-accepted-android-sdk-licenses: false
-          cmdline-tools-version: '${{ env.cmdline_tools_version }}'
-          packages: 'platforms;android-${{ env.platforms_short_version }} build-tools;${{ env.platforms_full_version }} platform-tools'
+          cmdline-tools-version: '${{ needs.pre.outputs.cmdline_tools_version }}'
+          packages: 'platforms;android-${{ needs.pre.outputs.platforms_short_version }} build-tools;${{ needs.pre.outputs.platforms_full_version }} platform-tools'
 
       - name: Install NDK
         run: |
           echo "y" | ${ANDROID_HOME}/cmdline-tools/latest/bin/sdkmanager \
             --channel=0 \
-            --install "ndk;${{ env.ndk_version }}"
-          echo "NDK_HOME=${ANDROID_HOME}/ndk/${{ env.ndk_version }}" >> "$GITHUB_ENV"
-          echo "ANDROID_NDK_HOME=${ANDROID_HOME}/ndk/${{ env.ndk_version }}" >> "$GITHUB_ENV"
+            --install "ndk;${{ needs.pre.outputs.ndk_version }}"
+          echo "NDK_HOME=${ANDROID_HOME}/ndk/${{ needs.pre.outputs.ndk_version }}" >> "$GITHUB_ENV"
+          echo "ANDROID_NDK_HOME=${ANDROID_HOME}/ndk/${{ needs.pre.outputs.ndk_version }}" >> "$GITHUB_ENV"
 
       - name: Install System Tools
         run: |
@@ -134,10 +134,18 @@ jobs:
         run: |
           mkdir -p ${{ github.workspace }}/build
           cd ${{ github.workspace }}/build
-          git clone -b ${{ inputs.ng_branch }} https://github.com/${{ inputs.ng_repo }}/v2rayNG.git
+          git clone -b ${{ needs.pre.outputs.ng_branch }} https://github.com/${{ needs.pre.outputs.ng_repo }}/v2rayNG.git
           cd ${{ github.workspace }}/build/v2rayNG
           git checkout --force --quiet ${{ inputs.ng_commit_id }}
           git submodule update --init --recursive
+
+      - name: specify hevtun version
+        if: ${{ inputs.specify_hevtun }}
+        run: |
+          cd ${{ github.workspace }}/build/v2rayNG/hev-socks5-tunnel
+          git fetch
+          git pull origin ${{ needs.pre.outputs.hevtun_branch }}
+          git checkout --force --quiet ${{ inputs.hevtun_commit_id }}
 
       - name: fix Gradle Pre
         run: |
@@ -158,7 +166,7 @@ jobs:
 
       - name: add v2rayNG ndk version
         run: |
-          sed -i $'10i\\\n    ndkVersion = "${{ env.ndk_version }}"' ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/build.gradle.kts
+          sed -i $'10i\\\n    ndkVersion = "${{ needs.pre.outputs.ndk_version }}"' ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/build.gradle.kts
 
       - name: import apk sign config
         run: |
@@ -170,14 +178,14 @@ jobs:
           cd ${{ github.workspace }}/build
           git clone -b ${{ inputs.x_lib_branch }} https://github.com/${{ inputs.x_lib_repo }}/AndroidLibXrayLite.git
           cd ${{ github.workspace }}/build/AndroidLibXrayLite
-          git checkout --force --quiet ${{ inputs.x_lib_commit_id }}
+          git checkout --force --quiet ${{ needs.pre.outputs.default_commit_id }}
 
       - name: use git remote repo xray
         run: |
           mkdir -p ${{ github.workspace }}/build/AndroidLibXrayLite/ActionsBuild
           cd ${{ github.workspace }}/build/AndroidLibXrayLite/ActionsBuild
           rm -rf Xray-core
-          git clone -b ${{ inputs.x_branch }} https://github.com/XTLS/Xray-core.git
+          git clone -b ${{ needs.pre.outputs.x_branch }} https://github.com/XTLS/Xray-core.git
           cd ${{ github.workspace }}/build/AndroidLibXrayLite/ActionsBuild/Xray-core
           git checkout --force --quiet ${{ inputs.x_commit_id }}
           echo "x_short_version=$(git rev-parse --short HEAD)" >> "$GITHUB_ENV"
@@ -192,8 +200,8 @@ jobs:
         run: |
           cp -rf ${{ github.workspace }}/ext/nouse.go ${{ github.workspace }}/build/AndroidLibXrayLite
           cd ${{ github.workspace }}/build/AndroidLibXrayLite
-          go get google.golang.org/genproto@${{ env.genproto_version }}
-          go get google.golang.org/genproto/googleapis/rpc@${{ env.genproto_version }}
+          go get google.golang.org/genproto@${{ needs.pre.outputs.genproto_version }}
+          go get google.golang.org/genproto/googleapis/rpc@${{ needs.pre.outputs.genproto_version }}
 
       - name: go get specify xray
         run: |
@@ -309,7 +317,7 @@ jobs:
 
   release:
     if: ${{ inputs.release_archives }}
-    needs: [build]
+    needs: [pre, build]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -372,7 +380,7 @@ jobs:
           prerelease: false
           body: |
             V2rayNG(Xray) build result.
-            Xray-core from [${{ inputs.x_branch }}] [${{ needs.build.outputs.xray_short_commit_id }}]
-            v2rayNG from [${{ inputs.ng_repo }}] [${{ inputs.ng_branch }}] [${{ needs.build.outputs.ng_short_commit_id }}]
+            Xray-core from [${{ needs.pre.outputs.x_branch }}] [${{ needs.build.outputs.xray_short_commit_id }}]
+            v2rayNG from [${{ needs.pre.outputs.ng_repo }}] [${{ needs.pre.outputs.ng_branch }}] [${{ needs.build.outputs.ng_short_commit_id }}]
           files: |
             ${{ github.workspace }}/archives/**
