@@ -144,9 +144,10 @@ jobs:
         if: ${{ inputs.specify_hevtun }}
         run: |
           cd ${{ github.workspace }}/build/v2rayNG/hev-socks5-tunnel
-          git fetch
+          git fetch --all
           git pull origin ${{ needs.pre.outputs.hevtun_branch }}
           git checkout --force --quiet ${{ inputs.hevtun_commit_id }}
+          git submodule update --init --recursive
 
       - name: fix Gradle Pre
         run: |
