@@ -85,6 +85,7 @@ jobs:
     outputs:
       xray_short_commit_id: ${{ steps.set_global_params.outputs.xray_short_commit_id }}
       ng_short_commit_id: ${{ steps.set_global_params.outputs.ng_short_commit_id }}
+      hevtun_short_commit_id: ${{ steps.set_global_params.outputs.hevtun_short_commit_id }}
     steps:
       - uses: actions/checkout@v5
         with:
@@ -216,6 +217,8 @@ jobs:
           echo "xray_short_commit_id=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
           cd ${{ github.workspace }}/build/v2rayNG
           echo "ng_short_commit_id=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
+          cd ${{ github.workspace }}/build/v2rayNG/hev-socks5-tunnel
+          echo "hevtun_short_commit_id=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
 
       - name: Build xray elf
         if: ${{ inputs.build_xray_elf }}
@@ -382,5 +385,6 @@ jobs:
             V2rayNG(Xray) build result.
             Xray-core from [${{ needs.pre.outputs.x_branch }}] [${{ needs.build.outputs.xray_short_commit_id }}]
             v2rayNG from [${{ needs.pre.outputs.ng_repo }}] [${{ needs.pre.outputs.ng_branch }}] [${{ needs.build.outputs.ng_short_commit_id }}]
+            hev-socks5-tunnel from [${{ needs.build.outputs.hevtun_short_commit_id }}]
           files: |
             ${{ github.workspace }}/archives/**
