@@ -168,7 +168,12 @@ jobs:
 
       - name: add v2rayNG ndk version
         run: |
-          sed -i $'10i\\\n    ndkVersion = "${{ needs.pre.outputs.ndk_version }}"' ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/build.gradle.kts
+          sed -i $'/compileSdk = */a\\\n    ndkVersion = "${{ needs.pre.outputs.ndk_version }}"' ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/build.gradle.kts
+
+      - name: enable V3 sign
+        run: |
+          sed -i $'/android {/r ${{ github.workspace }}/ext/signing_enable_config.kts' ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/build.gradle.kts
+          sed -i $'/isMinifyEnabled = */r ${{ github.workspace }}/ext/signing_buildtype_release.kts' ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/build.gradle.kts
 
       - name: import apk sign config
         run: |

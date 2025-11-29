@@ -1,0 +1,3 @@
+
+            signingConfig = signingConfigs.getByName("release")
+
