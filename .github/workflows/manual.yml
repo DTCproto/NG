@@ -64,7 +64,6 @@ jobs:
       hevtun_branch: "main"
       default_commit_id: "HEAD~0"
       ndk_version: "29.0.14206865"
-      genproto_version: "v0.0.0-20250804133106-a7a43d27e69b"
       cmdline_tools_version: "13114758"
       platforms_short_version: "36"
       platforms_full_version: "36.1.0"
@@ -197,6 +196,7 @@ jobs:
           git checkout --force --quiet ${{ inputs.x_commit_id }}
           echo "x_short_version=$(git rev-parse --short HEAD)" >> "$GITHUB_ENV"
           echo "x_describe_version=$(git describe --always --dirty)" >> "$GITHUB_ENV"
+          echo "x_genproto_version=$(awk '$1 == \"google.golang.org/genproto/googleapis/rpc\" {print $2}' go.mod)" >> "$GITHUB_ENV"
 
       - name: edit lib version
         run: |
@@ -207,8 +207,8 @@ jobs:
         run: |
           cp -rf ${{ github.workspace }}/ext/nouse.go ${{ github.workspace }}/build/AndroidLibXrayLite
           cd ${{ github.workspace }}/build/AndroidLibXrayLite
-          go get google.golang.org/genproto@${{ needs.pre.outputs.genproto_version }}
-          go get google.golang.org/genproto/googleapis/rpc@${{ needs.pre.outputs.genproto_version }}
+          go get google.golang.org/genproto@${{ env.x_genproto_version }}
+          go get google.golang.org/genproto/googleapis/rpc@${{ env.x_genproto_version }}
 
       - name: go get specify xray
         run: |
