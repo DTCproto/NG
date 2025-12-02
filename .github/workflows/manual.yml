@@ -196,7 +196,8 @@ jobs:
           git checkout --force --quiet ${{ inputs.x_commit_id }}
           echo "x_short_version=$(git rev-parse --short HEAD)" >> "$GITHUB_ENV"
           echo "x_describe_version=$(git describe --always --dirty)" >> "$GITHUB_ENV"
-          echo "x_genproto_version=$(awk '$1 == \"google.golang.org/genproto/googleapis/rpc\" {print $2}' go.mod)" >> "$GITHUB_ENV"
+          x_genproto_version=$(awk '$1 == "google.golang.org/genproto/googleapis/rpc" {print $2}' go.mod)
+          echo "x_genproto_version=$x_genproto_version" >> "$GITHUB_ENV"
 
       - name: edit lib version
         run: |
