@@ -37,6 +37,10 @@ on:
         description: "specify HevTun version"
         default: true
         type: boolean
+      restore_hevtun:
+        description: "restore hevtun"
+        default: false
+        type: boolean
       build_xray_elf:
         description: "build xray"
         default: true
@@ -217,6 +221,13 @@ jobs:
           go get github.com/xtls/xray-core@${{ env.x_short_version }}
           go mod tidy
 
+      - name: mkdir restore dir
+        run: |
+          rm -rf ${{ github.workspace }}/build/restore/*
+          mkdir -p ${{ github.workspace }}/build/restore/hevtun/libs/
+          mkdir -p ${{ github.workspace }}/build/restore/badvpn/libs/
+          mkdir -p ${{ github.workspace }}/build/restore/hysteria/libs/
+
       - name: set global params
         id: set_global_params
         run: |
@@ -226,6 +237,12 @@ jobs:
           echo "ng_short_commit_id=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
           cd ${{ github.workspace }}/build/v2rayNG/hev-socks5-tunnel
           echo "hevtun_short_commit_id=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: set restore hash params
+        run: |
+          echo "hash_badvpn_head=${{ hashFiles('build/v2rayNG/.git/modules/badvpn/HEAD') }}-${{ hashFiles('build/v2rayNG/.git/modules/libancillary/HEAD') }}-${{ hashFiles('build/v2rayNG/compile-tun2socks.sh') }}" >> "$GITHUB_ENV"
+          echo "hash_hevtun_head=${{ hashFiles('build/v2rayNG/.git/modules/hev-socks5-tunnel/HEAD') }}-${{ hashFiles('build/v2rayNG/compile-hevtun.sh') }}" >> "$GITHUB_ENV"
+          echo "hash_hysteria_head=${{ hashFiles('build/v2rayNG/.git/modules/hysteria/HEAD') }}-${{ hashFiles('build/v2rayNG/libhysteria2.sh') }}" >> "$GITHUB_ENV"
 
       - name: Build xray elf
         if: ${{ inputs.build_xray_elf }}
@@ -263,20 +280,78 @@ jobs:
           mkdir -p ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/libs
           cp *.aar ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/libs/
 
+      - name: Restore cache hysteria
+        id: cache-hysteria-restore
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ github.workspace }}/build/restore/hysteria/libs/
+          key: lib-hysteria-${{ runner.os }}-${{ env.hash_hysteria_head }}
+
       - name: Build ext libs(hysteria)
+        if: ${{ steps.cache-hysteria-restore.outputs.cache-hit != 'true' }}
         run: |
           cd ${{ github.workspace }}/build/v2rayNG
           bash libhysteria2.sh
           tree ${{ github.workspace }}/build/v2rayNG/hysteria/libs/
-          cp -r ${{ github.workspace }}/build/v2rayNG/hysteria/libs/* ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/libs/
+          cp -r ${{ github.workspace }}/build/v2rayNG/hysteria/libs/* ${{ github.workspace }}/build/restore/hysteria/libs/
 
-      - name: Build ext libs(tun2socks)
+      - name: Save cache hysteria
+        if: ${{ steps.cache-hysteria-restore.outputs.cache-hit != 'true' }}
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ github.workspace }}/build/restore/hysteria/libs/
+          key: lib-hysteria-${{ runner.os }}-${{ env.hash_hysteria_head }}
+
+      - name: Restore cache badvpn
+        id: cache-badvpn-restore
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ github.workspace }}/build/restore/badvpn/libs/
+          key: lib-badvpn-${{ runner.os }}-${{ env.hash_badvpn_head }}
+
+      - name: Build ext libs(badvpn-tun2socks)
+        if: ${{ steps.cache-badvpn-restore.outputs.cache-hit != 'true' }}
         run: |
           cd ${{ github.workspace }}/build/v2rayNG
           bash compile-tun2socks.sh
+          tree ${{ github.workspace }}/build/v2rayNG/libs/
+          cp -r ${{ github.workspace }}/build/v2rayNG/libs/* ${{ github.workspace }}/build/restore/badvpn/libs/
+
+      - name: Save cache badvpn
+        if: ${{ steps.cache-badvpn-restore.outputs.cache-hit != 'true' }}
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ github.workspace }}/build/restore/badvpn/libs/
+          key: lib-badvpn-${{ runner.os }}-${{ env.hash_badvpn_head }}
+
+      - name: Restore cache hevtun
+        if: ${{ inputs.restore_hevtun }}
+        id: cache-hevtun-restore
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ github.workspace }}/build/restore/hevtun/libs/
+          key: lib-hevtun-${{ runner.os }}-${{ env.hash_hevtun_head }}
+
+      - name: Build ext libs(hevtun)
+        if: ${{ steps.cache-hevtun-restore.outputs.cache-hit != 'true' }}
+        run: |
+          cd ${{ github.workspace }}/build/v2rayNG
           bash compile-hevtun.sh
           tree ${{ github.workspace }}/build/v2rayNG/libs/
-          cp -r ${{ github.workspace }}/build/v2rayNG/libs/* ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/libs/
+          cp -r ${{ github.workspace }}/build/v2rayNG/libs/* ${{ github.workspace }}/build/restore/hevtun/libs/
+
+      - name: Save cache hevtun
+        if: ${{ inputs.restore_hevtun && steps.cache-hevtun-restore.outputs.cache-hit != 'true' }}
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ github.workspace }}/build/restore/hevtun/libs/
+          key: lib-hevtun-${{ runner.os }}-${{ env.hash_hevtun_head }}
+
+      - name: manage libs
+        run: |
+          mv -f ${{ github.workspace }}/build/restore/hevtun/libs/ ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/libs/
+          mv -f ${{ github.workspace }}/build/restore/badvpn/libs/ ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/libs/
+          mv -f ${{ github.workspace }}/build/restore/hysteria/libs/ ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/libs/
 
       - name: Build apk
         run: |
