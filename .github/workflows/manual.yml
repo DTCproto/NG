@@ -297,7 +297,7 @@ jobs:
 
       - name: Save cache hysteria
         if: ${{ steps.cache-hysteria-restore.outputs.cache-hit != 'true' }}
-        uses: actions/cache/restore@v4
+        uses: actions/cache/save@v4
         with:
           path: ${{ github.workspace }}/build/restore/hysteria/libs/
           key: lib-hysteria-${{ runner.os }}-${{ env.hash_hysteria_head }}
@@ -319,7 +319,7 @@ jobs:
 
       - name: Save cache badvpn
         if: ${{ steps.cache-badvpn-restore.outputs.cache-hit != 'true' }}
-        uses: actions/cache/restore@v4
+        uses: actions/cache/save@v4
         with:
           path: ${{ github.workspace }}/build/restore/badvpn/libs/
           key: lib-badvpn-${{ runner.os }}-${{ env.hash_badvpn_head }}
@@ -342,7 +342,7 @@ jobs:
 
       - name: Save cache hevtun
         if: ${{ inputs.restore_hevtun && steps.cache-hevtun-restore.outputs.cache-hit != 'true' }}
-        uses: actions/cache/restore@v4
+        uses: actions/cache/save@v4
         with:
           path: ${{ github.workspace }}/build/restore/hevtun/libs/
           key: lib-hevtun-${{ runner.os }}-${{ env.hash_hevtun_head }}
