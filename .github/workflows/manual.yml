@@ -291,6 +291,7 @@ jobs:
         if: ${{ steps.cache-hysteria-restore.outputs.cache-hit != 'true' }}
         run: |
           cd ${{ github.workspace }}/build/v2rayNG
+          mkdir -p ${{ github.workspace }}/build/v2rayNG/hysteria/libs/
           bash libhysteria2.sh
           tree ${{ github.workspace }}/build/v2rayNG/hysteria/libs/
           cp -r ${{ github.workspace }}/build/v2rayNG/hysteria/libs/* ${{ github.workspace }}/build/restore/hysteria/libs/
@@ -313,6 +314,7 @@ jobs:
         if: ${{ steps.cache-badvpn-restore.outputs.cache-hit != 'true' }}
         run: |
           cd ${{ github.workspace }}/build/v2rayNG
+          mkdir -p ${{ github.workspace }}/build/v2rayNG/libs/
           bash compile-tun2socks.sh
           tree ${{ github.workspace }}/build/v2rayNG/libs/
           cp -r ${{ github.workspace }}/build/v2rayNG/libs/* ${{ github.workspace }}/build/restore/badvpn/libs/
@@ -336,6 +338,7 @@ jobs:
         if: ${{ steps.cache-hevtun-restore.outputs.cache-hit != 'true' }}
         run: |
           cd ${{ github.workspace }}/build/v2rayNG
+          mkdir -p ${{ github.workspace }}/build/v2rayNG/libs/
           bash compile-hevtun.sh
           tree ${{ github.workspace }}/build/v2rayNG/libs/
           cp -r ${{ github.workspace }}/build/v2rayNG/libs/* ${{ github.workspace }}/build/restore/hevtun/libs/
@@ -349,6 +352,7 @@ jobs:
 
       - name: manage libs
         run: |
+          mkdir -p ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/libs/
           cp -r ${{ github.workspace }}/build/restore/hevtun/libs/* ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/libs/
           cp -r ${{ github.workspace }}/build/restore/badvpn/libs/* ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/libs/
           cp -r ${{ github.workspace }}/build/restore/hysteria/libs/* ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/libs/
