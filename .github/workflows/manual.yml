@@ -349,9 +349,9 @@ jobs:
 
       - name: manage libs
         run: |
-          mv -f ${{ github.workspace }}/build/restore/hevtun/libs/ ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/libs/
-          mv -f ${{ github.workspace }}/build/restore/badvpn/libs/ ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/libs/
-          mv -f ${{ github.workspace }}/build/restore/hysteria/libs/ ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/libs/
+          cp -r ${{ github.workspace }}/build/restore/hevtun/libs/* ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/libs/
+          cp -r ${{ github.workspace }}/build/restore/badvpn/libs/* ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/libs/
+          cp -r ${{ github.workspace }}/build/restore/hysteria/libs/* ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/libs/
 
       - name: Build apk
         run: |
