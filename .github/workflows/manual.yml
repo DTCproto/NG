@@ -99,7 +99,7 @@ jobs:
       - name: Free Disk Space
         uses: endersonmenezes/free-disk-space@v3  # Use @main for latest, @v3 for stable
         with:
-          remove_android: true
+          #remove_android: true
           remove_dotnet: true
           remove_haskell: true
           remove_tool_cache: true
