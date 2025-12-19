@@ -114,12 +114,12 @@ jobs:
       - name: (After)Free Disk-Space
         run: df -h
 
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           submodules: 'true'
 
       - name: Setup Java
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: "temurin"
           java-version: "21"
@@ -137,7 +137,7 @@ jobs:
           echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
 
       #- name: Set up Gradle
-      #  uses: gradle/actions/setup-gradle@v4
+      #  uses: gradle/actions/setup-gradle@v5
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
@@ -306,7 +306,7 @@ jobs:
 
       - name: Restore cache hysteria
         id: cache-hysteria-restore
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v5
         with:
           path: ${{ github.workspace }}/build/restore/hysteria/libs/
           key: lib-hysteria-${{ runner.os }}-${{ env.hash_hysteria_head }}
@@ -322,14 +322,14 @@ jobs:
 
       - name: Save cache hysteria
         if: ${{ steps.cache-hysteria-restore.outputs.cache-hit != 'true' }}
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@v5
         with:
           path: ${{ github.workspace }}/build/restore/hysteria/libs/
           key: lib-hysteria-${{ runner.os }}-${{ env.hash_hysteria_head }}
 
       - name: Restore cache badvpn
         id: cache-badvpn-restore
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v5
         with:
           path: ${{ github.workspace }}/build/restore/badvpn/libs/
           key: lib-badvpn-${{ runner.os }}-${{ env.hash_badvpn_head }}
@@ -345,7 +345,7 @@ jobs:
 
       - name: Save cache badvpn
         if: ${{ steps.cache-badvpn-restore.outputs.cache-hit != 'true' }}
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@v5
         with:
           path: ${{ github.workspace }}/build/restore/badvpn/libs/
           key: lib-badvpn-${{ runner.os }}-${{ env.hash_badvpn_head }}
@@ -353,7 +353,7 @@ jobs:
       - name: Restore cache hevtun
         if: ${{ inputs.restore_hevtun }}
         id: cache-hevtun-restore
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v5
         with:
           path: ${{ github.workspace }}/build/restore/hevtun/libs/
           key: lib-hevtun-${{ runner.os }}-${{ env.hash_hevtun_head }}
@@ -369,7 +369,7 @@ jobs:
 
       - name: Save cache hevtun
         if: ${{ inputs.restore_hevtun && steps.cache-hevtun-restore.outputs.cache-hit != 'true' }}
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@v5
         with:
           path: ${{ github.workspace }}/build/restore/hevtun/libs/
           key: lib-hevtun-${{ runner.os }}-${{ env.hash_hevtun_head }}
@@ -389,7 +389,7 @@ jobs:
 
       - name: Upload xray elf
         if: ${{ inputs.build_xray_elf }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: bin-${{ env.x_short_version }}
           compression-level: 9
@@ -397,7 +397,7 @@ jobs:
             ${{ github.workspace }}/build/AndroidLibXrayLite/ActionsBuild/Xray-core/build_assets/*.zip
 
       - name: Upload aar
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: aar-${{ env.x_short_version }}
           compression-level: 9
@@ -405,7 +405,7 @@ jobs:
             ${{ github.workspace }}/build/AndroidLibXrayLite/*.aar
 
       - name: Upload arm dev apk
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: apks_arm_v8a_dev-${{ env.x_short_version }}
           compression-level: 9
@@ -420,7 +420,7 @@ jobs:
             !${{ github.workspace }}/**/*fdroid*
 
       - name: Upload all dev apk
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: apks_all_dev-${{ env.x_short_version }}
           compression-level: 9
@@ -448,7 +448,7 @@ jobs:
           sudo apt install tree -y
 
       - name: Download apks archives
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v7
         with:
           pattern: "apks_all*"
           merge-multiple: true
@@ -464,7 +464,7 @@ jobs:
           find ${{ github.workspace }}/apks/ -type f -name "*arm64-v8a.apk" | xargs 7z a -mx9 ${{ github.workspace }}/archives/apks_arm_v8a-V-${{ env.current_date_time }}.7z
 
       - name: Download bin archives
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v7
         if: ${{ inputs.build_xray_elf }}
         with:
           pattern: "bin*"
