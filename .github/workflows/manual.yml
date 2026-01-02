@@ -249,7 +249,6 @@ jobs:
         run: |
           rm -rf ${{ github.workspace }}/build/restore/*
           mkdir -p ${{ github.workspace }}/build/restore/hevtun/libs/
-          mkdir -p ${{ github.workspace }}/build/restore/badvpn/libs/
           mkdir -p ${{ github.workspace }}/build/restore/hysteria/libs/
 
       - name: set global params
@@ -264,7 +263,6 @@ jobs:
 
       - name: set restore hash params
         run: |
-          echo "hash_badvpn_head=${{ hashFiles('build/v2rayNG/.git/modules/badvpn/HEAD') }}-${{ hashFiles('build/v2rayNG/.git/modules/libancillary/HEAD') }}-${{ hashFiles('build/v2rayNG/compile-tun2socks.sh') }}" >> "$GITHUB_ENV"
           echo "hash_hevtun_head=${{ hashFiles('build/v2rayNG/.git/modules/hev-socks5-tunnel/HEAD') }}-${{ hashFiles('build/v2rayNG/compile-hevtun.sh') }}" >> "$GITHUB_ENV"
           echo "hash_hysteria_head=${{ hashFiles('build/v2rayNG/.git/modules/hysteria/HEAD') }}-${{ hashFiles('build/v2rayNG/libhysteria2.sh') }}" >> "$GITHUB_ENV"
 
@@ -327,29 +325,6 @@ jobs:
           path: ${{ github.workspace }}/build/restore/hysteria/libs/
           key: lib-hysteria-${{ runner.os }}-${{ env.hash_hysteria_head }}
 
-      - name: Restore cache badvpn
-        id: cache-badvpn-restore
-        uses: actions/cache/restore@v5
-        with:
-          path: ${{ github.workspace }}/build/restore/badvpn/libs/
-          key: lib-badvpn-${{ runner.os }}-${{ env.hash_badvpn_head }}
-
-      - name: Build ext libs(badvpn-tun2socks)
-        if: ${{ steps.cache-badvpn-restore.outputs.cache-hit != 'true' }}
-        run: |
-          cd ${{ github.workspace }}/build/v2rayNG
-          mkdir -p ${{ github.workspace }}/build/v2rayNG/libs/
-          bash compile-tun2socks.sh
-          tree ${{ github.workspace }}/build/v2rayNG/libs/
-          cp -r ${{ github.workspace }}/build/v2rayNG/libs/* ${{ github.workspace }}/build/restore/badvpn/libs/
-
-      - name: Save cache badvpn
-        if: ${{ steps.cache-badvpn-restore.outputs.cache-hit != 'true' }}
-        uses: actions/cache/save@v5
-        with:
-          path: ${{ github.workspace }}/build/restore/badvpn/libs/
-          key: lib-badvpn-${{ runner.os }}-${{ env.hash_badvpn_head }}
-
       - name: Restore cache hevtun
         if: ${{ inputs.restore_hevtun }}
         id: cache-hevtun-restore
@@ -378,7 +353,6 @@ jobs:
         run: |
           mkdir -p ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/libs/
           cp -r ${{ github.workspace }}/build/restore/hevtun/libs/* ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/libs/
-          cp -r ${{ github.workspace }}/build/restore/badvpn/libs/* ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/libs/
           cp -r ${{ github.workspace }}/build/restore/hysteria/libs/* ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/libs/
 
       - name: Build apk
