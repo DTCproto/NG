@@ -1,4 +1,4 @@
-name: BUILD_APK_BY_MANUAL
+name: BUILD_APK_BY_MANUAL(NG&XRAY)
 
 on:
   workflow_dispatch:

@@ -1,0 +1,119 @@
+name: BUILD_DOCKER(XRAY)
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_archives:
+        description: "enable release archives"
+        default: true
+        type: boolean
+
+concurrency:
+  group: ${{ github.workflow }}
+
+jobs:
+  build-base:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+      attestations: write
+      id-token: write
+    # 同一个标签，不能多次push，会强制清空覆盖所有数据
+    # strategy:
+    #   matrix:
+    #     os: [linux/amd64, linux/arm64]
+    steps:
+      #- name: Free Disk-Space
+      #  run: df -h && sudo apt-get clean && docker system prune -a -f && sudo rm -rf /usr/local/lib/android /usr/share/dotnet /opt/ghc && df -h
+
+      - name: (Before)Free Disk-Space
+        run: df -h
+
+      - name: Free Disk Space
+        uses: endersonmenezes/free-disk-space@v3  # Use @main for latest, @v3 for stable
+        with:
+          remove_android: true
+          remove_dotnet: true
+          remove_haskell: true
+          remove_tool_cache: true
+          remove_swap: true
+          #remove_packages: "azure-cli google-cloud-cli microsoft-edge-stable google-chrome-stable firefox postgresql* temurin-* *llvm* mysql* dotnet-sdk-*"
+          remove_packages_one_command: true
+          #remove_folders: "/usr/share/swift /usr/share/miniconda /usr/share/az* /usr/local/lib/node_modules /usr/local/share/chromium /usr/local/share/powershell /usr/local/julia /usr/local/aws-cli /usr/local/aws-sam-cli /usr/share/gradle"
+          rm_cmd: "rmz"  # Use 'rmz' for faster deletion (default: 'rm')
+          #rmz_version: "3.1.1"  # Required when rm_cmd is 'rmz'
+          testing: false
+
+      - name: (After)Free Disk-Space
+        run: df -h
+
+      - uses: actions/checkout@v6
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+        with:
+          image: tonistiigi/binfmt:qemu-v10.0.4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Install APT dependencies
+        uses: awalsh128/cache-apt-pkgs-action@v1
+        with:
+          packages: git curl wget
+
+      - name: init
+        run: |
+          cp -rf ${{ github.workspace }}/conf/* ${{ github.workspace }}/mainline/
+          ls ${{ github.workspace }}/mainline/
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      
+      - name: Login to the Container registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: set lower case name
+        run: |
+          echo "ACTOR_LC=${ACTOR,,}" >>${GITHUB_ENV}
+          echo "REPOSITORY_LC=${REPOSITORY,,}" >>${GITHUB_ENV}
+        env:
+          ACTOR: '${{ github.actor }}'
+          REPOSITORY: '${{ github.repository }}'
+
+      # 自动标签
+      #- name: Extract metadata (tags, labels) for Docker
+      #  id: meta
+      #  uses: docker/metadata-action@v5
+      #  with:
+      #    images: |
+      #      ${{ secrets.DOCKERHUB_USERNAME }}/nginx
+      #      ghcr.io/${{ github.repository }}
+
+      - name: Build And Push (docker)
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ github.workspace }}/mainline/
+          file: ${{ github.workspace }}/mainline/alpine.Dockerfile
+          platforms: |
+            linux/amd64
+            linux/arm64
+          build-args: |
+            RELEASE_ACCOUNT='DTCproto'
+          push: ${{ inputs.release_archives }}
+          provenance: false
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/xray:alpine
+            ${{ secrets.DOCKERHUB_USERNAME }}/xray:latest
+            ghcr.io/${{ env.ACTOR_LC }}/xray:alpine
+            ghcr.io/${{ env.ACTOR_LC }}/xray:latest
+          cache-from: type=registry,ref=ghcr.io/${{ env.ACTOR_LC }}/xray:latest
+          cache-to: type=inline
