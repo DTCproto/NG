@@ -65,7 +65,6 @@ jobs:
 
       - name: init
         run: |
-          cp -rf ${{ github.workspace }}/conf/* ${{ github.workspace }}/mainline/
           ls ${{ github.workspace }}/mainline/
 
       - name: Login to Docker Hub
@@ -111,9 +110,11 @@ jobs:
           push: ${{ inputs.release_archives }}
           provenance: false
           tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/xray:alpine-latest
             ${{ secrets.DOCKERHUB_USERNAME }}/xray:alpine
             ${{ secrets.DOCKERHUB_USERNAME }}/xray:latest
+            ghcr.io/${{ env.ACTOR_LC }}/xray:alpine-latest
             ghcr.io/${{ env.ACTOR_LC }}/xray:alpine
             ghcr.io/${{ env.ACTOR_LC }}/xray:latest
-          cache-from: type=registry,ref=ghcr.io/${{ env.ACTOR_LC }}/xray:latest
+          cache-from: type=registry,ref=ghcr.io/${{ env.ACTOR_LC }}/xray:alpine-latest
           cache-to: type=inline
