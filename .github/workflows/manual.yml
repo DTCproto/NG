@@ -250,7 +250,6 @@ jobs:
         run: |
           rm -rf ${{ github.workspace }}/build/restore/*
           mkdir -p ${{ github.workspace }}/build/restore/hevtun/libs/
-          mkdir -p ${{ github.workspace }}/build/restore/hysteria/libs/
 
       - name: set global params
         id: set_global_params
@@ -265,7 +264,6 @@ jobs:
       - name: set restore hash params
         run: |
           echo "hash_hevtun_head=${{ hashFiles('build/v2rayNG/.git/modules/hev-socks5-tunnel/HEAD') }}-${{ hashFiles('build/v2rayNG/compile-hevtun.sh') }}" >> "$GITHUB_ENV"
-          echo "hash_hysteria_head=${{ hashFiles('build/v2rayNG/.git/modules/hysteria/HEAD') }}-${{ hashFiles('build/v2rayNG/libhysteria2.sh') }}" >> "$GITHUB_ENV"
 
       - name: Build xray elf
         if: ${{ inputs.build_xray_elf }}
@@ -303,29 +301,6 @@ jobs:
           mkdir -p ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/libs
           cp *.aar ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/libs/
 
-      - name: Restore cache hysteria
-        id: cache-hysteria-restore
-        uses: actions/cache/restore@v5
-        with:
-          path: ${{ github.workspace }}/build/restore/hysteria/libs/
-          key: lib-hysteria-${{ runner.os }}-${{ env.hash_hysteria_head }}
-
-      - name: Build ext libs(hysteria)
-        if: ${{ steps.cache-hysteria-restore.outputs.cache-hit != 'true' }}
-        run: |
-          cd ${{ github.workspace }}/build/v2rayNG
-          mkdir -p ${{ github.workspace }}/build/v2rayNG/hysteria/libs/
-          bash libhysteria2.sh
-          tree ${{ github.workspace }}/build/v2rayNG/hysteria/libs/
-          cp -r ${{ github.workspace }}/build/v2rayNG/hysteria/libs/* ${{ github.workspace }}/build/restore/hysteria/libs/
-
-      - name: Save cache hysteria
-        if: ${{ steps.cache-hysteria-restore.outputs.cache-hit != 'true' }}
-        uses: actions/cache/save@v5
-        with:
-          path: ${{ github.workspace }}/build/restore/hysteria/libs/
-          key: lib-hysteria-${{ runner.os }}-${{ env.hash_hysteria_head }}
-
       - name: Restore cache hevtun
         if: ${{ inputs.restore_hevtun }}
         id: cache-hevtun-restore
@@ -354,7 +329,6 @@ jobs:
         run: |
           mkdir -p ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/libs/
           cp -r ${{ github.workspace }}/build/restore/hevtun/libs/* ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/libs/
-          cp -r ${{ github.workspace }}/build/restore/hysteria/libs/* ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/libs/
 
       - name: Build apk
         run: |
