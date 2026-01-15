@@ -223,10 +223,14 @@ jobs:
           git clone -b ${{ needs.pre.outputs.x_branch }} https://github.com/XTLS/Xray-core.git
           cd ${{ github.workspace }}/build/AndroidLibXrayLite/ActionsBuild/Xray-core
           git checkout --force --quiet ${{ inputs.x_commit_id }}
-          echo "x_short_version=$(git rev-parse --short HEAD)" >> "$GITHUB_ENV"
-          echo "x_describe_version=$(git describe --always --dirty)" >> "$GITHUB_ENV"
+          x_short_version=$(git rev-parse --short HEAD)
+          echo "x_short_version=${x_short_version}" >> "$GITHUB_ENV"
+          x_describe_version=$(git describe --always --dirty)
+          echo "x_describe_version=${x_describe_version}" >> "$GITHUB_ENV"
+          build_additional_info="${x_describe_version}(${x_short_version})"
+          echo "build_additional_info=${build_additional_info}" >> "$GITHUB_ENV"
           x_genproto_version=$(awk '$1 == "google.golang.org/genproto/googleapis/rpc" {print $2}' go.mod)
-          echo "x_genproto_version=$x_genproto_version" >> "$GITHUB_ENV"
+          echo "x_genproto_version=${x_genproto_version}" >> "$GITHUB_ENV"
 
       - name: edit lib version
         run: |
@@ -271,13 +275,13 @@ jobs:
           cd ${{ github.workspace }}/build/AndroidLibXrayLite/ActionsBuild/Xray-core
           echo 'Building Xray for windows(amd64)'
           mkdir -p build_assets/Xray-windows-64
-          GOEXPERIMENT=greenteagc CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -o build_assets/Xray-windows-64/xray.exe -trimpath -buildvcs=false -gcflags="all=-l=4" -ldflags="-X github.com/xtls/xray-core/core.build=${{ env.x_describe_version }} -s -w -buildid=" -v ./main
+          GOEXPERIMENT=greenteagc CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -o build_assets/Xray-windows-64/xray.exe -trimpath -buildvcs=false -gcflags="all=-l=4" -ldflags="-X github.com/xtls/xray-core/core.build=${{ env.build_additional_info }} -s -w -buildid=" -v ./main
           echo 'Building Xray for linux(amd64)'
           mkdir -p build_assets/Xray-linux-64
-          GOEXPERIMENT=greenteagc CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o build_assets/Xray-linux-64/xray -trimpath -buildvcs=false -gcflags="all=-l=4" -ldflags="-X github.com/xtls/xray-core/core.build=${{ env.x_describe_version }} -s -w -buildid=" -v ./main
+          GOEXPERIMENT=greenteagc CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o build_assets/Xray-linux-64/xray -trimpath -buildvcs=false -gcflags="all=-l=4" -ldflags="-X github.com/xtls/xray-core/core.build=${{ env.build_additional_info }} -s -w -buildid=" -v ./main
           echo 'Building Xray for linux(arm64)'
           mkdir -p build_assets/Xray-linux-arm64-v8a
-          GOEXPERIMENT=greenteagc CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -o build_assets/Xray-linux-arm64-v8a/xray -trimpath -buildvcs=false -gcflags="all=-l=4" -ldflags="-X github.com/xtls/xray-core/core.build=${{ env.x_describe_version }} -s -w -buildid=" -v ./main
+          GOEXPERIMENT=greenteagc CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -o build_assets/Xray-linux-arm64-v8a/xray -trimpath -buildvcs=false -gcflags="all=-l=4" -ldflags="-X github.com/xtls/xray-core/core.build=${{ env.build_additional_info }} -s -w -buildid=" -v ./main
           tree ${{ github.workspace }}/build/AndroidLibXrayLite/ActionsBuild/Xray-core/build_assets
  
       - name: zip xray elf
