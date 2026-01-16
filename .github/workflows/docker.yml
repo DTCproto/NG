@@ -22,6 +22,7 @@ jobs:
     outputs:
       default_commit_id: HEAD~0
       default_branch: ${{ steps.set_global_params.outputs.default_branch }}
+      core_release_version: ${{ steps.set_global_params.outputs.core_release_version }}
       ACTOR_LC: ${{ steps.set_case_params.outputs.ACTOR_LC }}
       REPOSITORY_LC: ${{ steps.set_case_params.outputs.REPOSITORY_LC }}
     steps:
@@ -29,6 +30,8 @@ jobs:
         id: set_global_params
         run: |
           echo "default_branch=main" >> "$GITHUB_OUTPUT"
+          core_release_version=$(nslookup api.github.com 8.8.4.4 | grep '^Address:' | grep -v 8.8.4.4 | sed 's/Address: //g' | head -n1 | xargs -I{} curl -ks --resolve api.github.com:443:{} "https://api.github.com/repos/DTCproto/NG/releases" | grep "tag_name" | head -n 1 | sed 's/\"//g;s/,//g;s/ //g;s/tag_name://g' | xargs -i echo '{}')
+          echo "core_release_version=${core_release_version}" >> "$GITHUB_OUTPUT"
 
       - name: set lower case name
         id: set_case_params
@@ -130,9 +133,11 @@ jobs:
           push: ${{ inputs.release_archives }}
           provenance: false
           tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/xray:alpine-${{ needs.pre.outputs.core_release_version }}
             ${{ secrets.DOCKERHUB_USERNAME }}/xray:alpine-latest
             ${{ secrets.DOCKERHUB_USERNAME }}/xray:alpine
             ${{ secrets.DOCKERHUB_USERNAME }}/xray:latest
+            ghcr.io/${{ needs.pre.outputs.ACTOR_LC }}/xray:alpine-${{ needs.pre.outputs.core_release_version }}
             ghcr.io/${{ needs.pre.outputs.ACTOR_LC }}/xray:alpine-latest
             ghcr.io/${{ needs.pre.outputs.ACTOR_LC }}/xray:alpine
             ghcr.io/${{ needs.pre.outputs.ACTOR_LC }}/xray:latest
