@@ -452,3 +452,15 @@ jobs:
             hev-socks5-tunnel from [${{ needs.build.outputs.hevtun_short_commit_id }}]
           files: |
             ${{ github.workspace }}/archives/**
+
+  build-docker:
+    if: ${{ inputs.release_archives }}
+    needs: [release]
+    uses: ./.github/workflows/docker.yml
+    permissions:
+      contents: write
+      packages: write
+      id-token: write
+      attestations: write
+    with:
+      release_archives: ${{ inputs.release_archives }}

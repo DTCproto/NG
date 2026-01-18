@@ -7,9 +7,12 @@ on:
         description: "enable release archives"
         default: true
         type: boolean
-
-concurrency:
-  group: ${{ github.workflow }}
+  workflow_call:
+    inputs:
+      release_archives:
+        description: "enable release archives"
+        default: true
+        type: boolean
 
 jobs:
   pre:
