@@ -453,14 +453,3 @@ jobs:
           files: |
             ${{ github.workspace }}/archives/**
 
-  build-docker:
-    if: ${{ inputs.release_archives }}
-    needs: [release]
-    uses: ./.github/workflows/docker.yml
-    permissions:
-      contents: write
-      packages: write
-      id-token: write
-      attestations: write
-    with:
-      release_archives: ${{ inputs.release_archives }}
