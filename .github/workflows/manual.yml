@@ -39,7 +39,7 @@ on:
         type: boolean
       restore_hevtun:
         description: "restore hevtun"
-        default: false
+        default: true
         type: boolean
       build_xray_elf:
         description: "build xray"
@@ -263,11 +263,14 @@ jobs:
           cd ${{ github.workspace }}/build/v2rayNG
           echo "ng_short_commit_id=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
           cd ${{ github.workspace }}/build/v2rayNG/hev-socks5-tunnel
-          echo "hevtun_short_commit_id=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
+          hevtun_short_commit_id=$(git rev-parse --short HEAD)
+          echo "hevtun_short_commit_id=${hevtun_short_commit_id}" >> "$GITHUB_OUTPUT"
+          echo "hevtun_short_commit_id=${hevtun_short_commit_id}" >> "$GITHUB_ENV"
 
       - name: set restore hash params
         run: |
-          echo "hash_hevtun_head=${{ hashFiles('build/v2rayNG/.git/modules/hev-socks5-tunnel/HEAD') }}-${{ hashFiles('build/v2rayNG/compile-hevtun.sh') }}" >> "$GITHUB_ENV"
+          echo "hash_hevtun_head=${{ env.hevtun_short_commit_id }}-${{ hashFiles('build/v2rayNG/compile-hevtun.sh') }}" >> "$GITHUB_ENV"
+        # echo "hash_hevtun_head=${{ hashFiles('build/v2rayNG/.git/modules/hev-socks5-tunnel/HEAD') }}-${{ hashFiles('build/v2rayNG/compile-hevtun.sh') }}" >> "$GITHUB_ENV"
 
       - name: Build xray elf
         if: ${{ inputs.build_xray_elf }}
