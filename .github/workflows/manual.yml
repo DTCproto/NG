@@ -17,7 +17,7 @@ on:
           - "DTCproto"
           - "2dust"
       x_lib_branch:
-        description: "指定~XrayLite分支"
+        description: "指定AndroidLibXrayLite分支"
         required: true
         default: "main"
         type: choice
@@ -68,7 +68,7 @@ jobs:
       hevtun_branch: "main"
       default_commit_id: "HEAD~0"
       ndk_version: "29.0.14206865"
-      cmdline_tools_version: "13114758"
+      cmdline_tools_version: "14742923"
       platforms_short_version: "36"
       platforms_full_version: "36.1.0"
     steps:
