@@ -299,12 +299,20 @@ jobs:
           done
           tree ${{ github.workspace }}/build/AndroidLibXrayLite/ActionsBuild/Xray-core/build_assets
 
+      - name: gen libv2ray assets
+        run: |
+          cd ${{ github.workspace }}/build/AndroidLibXrayLite
+          mkdir -p assets data
+          bash gen_assets.sh download
+          cp -v data/*.dat assets/
+          tree ${{ github.workspace }}/build/AndroidLibXrayLite/assets
+
       - name: Build libv2ray aar
         run: |
           cd ${{ github.workspace }}/build/AndroidLibXrayLite
           gomobile init
           go mod tidy -v
-          gomobile bind -v -androidapi 21 -trimpath -ldflags='-s -w -buildid=' ./
+          gomobile bind -v -androidapi 24 -trimpath -ldflags='-s -w -buildid=' ./
           mkdir -p ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/libs
           cp *.aar ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/libs/
 
