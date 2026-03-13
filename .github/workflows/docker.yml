@@ -118,7 +118,7 @@ jobs:
       #      ghcr.io/${{ github.repository }}
 
       - name: Build And Push (docker)
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: ${{ github.workspace }}/mainline/
           file: ${{ github.workspace }}/mainline/alpine.Dockerfile
