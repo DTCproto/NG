@@ -345,7 +345,7 @@ jobs:
 
       - name: Upload xray elf
         if: ${{ inputs.build_xray_elf }}
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: bin-${{ env.x_short_version }}
           compression-level: 9
@@ -353,7 +353,7 @@ jobs:
             ${{ github.workspace }}/build/AndroidLibXrayLite/ActionsBuild/Xray-core/build_assets/*.zip
 
       - name: Upload aar
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: aar-${{ env.x_short_version }}
           compression-level: 9
@@ -361,7 +361,7 @@ jobs:
             ${{ github.workspace }}/build/AndroidLibXrayLite/*.aar
 
       - name: Upload arm dev apk
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: apks_arm_v8a_dev-${{ env.x_short_version }}
           compression-level: 9
@@ -376,7 +376,7 @@ jobs:
             !${{ github.workspace }}/**/*fdroid*
 
       - name: Upload all dev apk
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: apks_all_dev-${{ env.x_short_version }}
           compression-level: 9
@@ -404,7 +404,7 @@ jobs:
           sudo apt install tree -y
 
       - name: Download apks archives
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           pattern: "apks_all*"
           merge-multiple: true
@@ -420,7 +420,7 @@ jobs:
           find ${{ github.workspace }}/apks/ -type f -name "*arm64-v8a.apk" | xargs 7z a -mx9 ${{ github.workspace }}/archives/apks_arm_v8a-V-${{ env.current_date_time }}.7z
 
       - name: Download bin archives
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         if: ${{ inputs.build_xray_elf }}
         with:
           pattern: "bin*"
