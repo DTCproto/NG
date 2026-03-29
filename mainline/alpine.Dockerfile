@@ -42,6 +42,8 @@ COPY config-simple.json /usr/local/etc/core/config.json
 
 ENV TZ=Asia/Shanghai
 ENV LC_TIME=C.UTF-8
+ENV LC_ALL=C.UTF-8
+ENV LANG=C.UTF-8
 
 # xray.location.asset -> XRAY_LOCATION_ASSET
 ENV XRAY_LOCATION_ASSET=/usr/local/share/core
