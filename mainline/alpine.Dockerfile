@@ -24,7 +24,7 @@ RUN set -eux; \
 	cd /usr/src/; \
 	chmod +x /usr/src/pre_bin.sh; \
 	ls -al /usr/src/; \
-	TARGETPLATFORM=${TARGETPLATFORM} RELEASE_ACCOUNT=${RELEASE_ACCOUNT} GOAMD64=${GOAMD64} ./pre_bin.sh; \
+	TARGETPLATFORM=${TARGETPLATFORM} RELEASE_ACCOUNT=${RELEASE_ACCOUNT} GOAMD64=${GOAMD64:-} ./pre_bin.sh; \
     tree /usr/opt/;
 
 FROM alpine AS dist

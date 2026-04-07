@@ -152,7 +152,7 @@ jobs:
             linux/amd64
           build-args: |
             RELEASE_ACCOUNT=${{ github.actor }}
-            GOAMD64=v3
+            GOAMD64=-v3
           push: ${{ inputs.release_archives }}
           provenance: false
           tags: |
@@ -178,7 +178,7 @@ jobs:
             linux/amd64
           build-args: |
             RELEASE_ACCOUNT=${{ github.actor }}
-            GOAMD64=v4
+            GOAMD64=-v4
           push: ${{ inputs.release_archives }}
           provenance: false
           tags: |

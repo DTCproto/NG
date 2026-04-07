@@ -22,7 +22,22 @@ case "${USE_TARGETPLATFORM}" in
     exit 1
     ;;
 esac
-FILE_NAME="Xray-linux-${CPU_TYPE_FILE_NAME}"
+
+# 判断AVX
+case "${USE_ACCOUNT}" in
+  "XTLS")
+    AVX_EXT_FILE_NAME=""
+    ;;
+  "DTCproto")
+    AVX_EXT_FILE_NAME="${USE_GOAMD64}"
+    ;;
+  *)
+    AVX_EXT_FILE_NAME=""
+    ;;
+esac
+
+# 拼接文件名
+FILE_NAME="Xray-linux-${CPU_TYPE_FILE_NAME}${AVX_EXT_FILE_NAME}"
 
 # 定义版本变量
 V2_RELEASE_ACCOUNT="DTCproto"
@@ -38,8 +53,12 @@ case "${USE_ACCOUNT}" in
   "XTLS")
     download_url="https://github.com/${X_RELEASE_ACCOUNT}/${X_RELEASE_REPO}/releases/download/${X_RELEASE_VERSION}/${FILE_NAME}.zip"
     ;;
+  "DTCproto")
+    download_url="https://github.com/${V2_RELEASE_ACCOUNT}/${V2_RELEASE_REPO}/releases/download/${V2_RELEASE_VERSION}/${FILE_NAME}.zip"
+    ;;
   *)
-    download_url="https://github.com/${V2_RELEASE_ACCOUNT}/${V2_RELEASE_REPO}/releases/download/${V2_RELEASE_VERSION}/${FILE_NAME}${USE_GOAMD64}.zip"
+    echo "Unsupported repo: ${USE_ACCOUNT}" >&2;
+    exit 1
     ;;
 esac
 
