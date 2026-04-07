@@ -126,7 +126,7 @@ jobs:
             linux/amd64
             linux/arm64
           build-args: |
-            RELEASE_ACCOUNT=DTCproto
+            RELEASE_ACCOUNT=${{ github.actor }}
           push: ${{ inputs.release_archives }}
           provenance: false
           tags: |
@@ -138,6 +138,58 @@ jobs:
             ghcr.io/${{ needs.pre.outputs.ACTOR_LC }}/xray:alpine-latest
             ghcr.io/${{ needs.pre.outputs.ACTOR_LC }}/xray:alpine
             ghcr.io/${{ needs.pre.outputs.ACTOR_LC }}/xray:latest
+          #cache-from: type=registry,ref=ghcr.io/${{ needs.pre.outputs.ACTOR_LC }}/xray:buildcache
+          #cache-to: type=registry,ref=ghcr.io/${{ needs.pre.outputs.ACTOR_LC }}/xray:buildcache,mode=max
+          # 完全禁用缓存(二选一)
+          no-cache: true
+
+      - name: Build And Push (docker)[v3]
+        uses: docker/build-push-action@v7
+        with:
+          context: ${{ github.workspace }}/mainline/
+          file: ${{ github.workspace }}/mainline/alpine.Dockerfile
+          platforms: |
+            linux/amd64
+          build-args: |
+            RELEASE_ACCOUNT=${{ github.actor }}
+            GOAMD64=v3
+          push: ${{ inputs.release_archives }}
+          provenance: false
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/xray:alpine-v3-${{ needs.pre.outputs.core_release_version }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/xray:alpine-v3-latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/xray:alpine-v3
+            ${{ secrets.DOCKERHUB_USERNAME }}/xray:latest-v3
+            ghcr.io/${{ needs.pre.outputs.ACTOR_LC }}/xray:alpine-v3-${{ needs.pre.outputs.core_release_version }}
+            ghcr.io/${{ needs.pre.outputs.ACTOR_LC }}/xray:alpine-v3-latest
+            ghcr.io/${{ needs.pre.outputs.ACTOR_LC }}/xray:alpine-v3
+            ghcr.io/${{ needs.pre.outputs.ACTOR_LC }}/xray:latest-v3
+          #cache-from: type=registry,ref=ghcr.io/${{ needs.pre.outputs.ACTOR_LC }}/xray:buildcache
+          #cache-to: type=registry,ref=ghcr.io/${{ needs.pre.outputs.ACTOR_LC }}/xray:buildcache,mode=max
+          # 完全禁用缓存(二选一)
+          no-cache: true
+
+      - name: Build And Push (docker)[v4]
+        uses: docker/build-push-action@v7
+        with:
+          context: ${{ github.workspace }}/mainline/
+          file: ${{ github.workspace }}/mainline/alpine.Dockerfile
+          platforms: |
+            linux/amd64
+          build-args: |
+            RELEASE_ACCOUNT=${{ github.actor }}
+            GOAMD64=v4
+          push: ${{ inputs.release_archives }}
+          provenance: false
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/xray:alpine-v4-${{ needs.pre.outputs.core_release_version }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/xray:alpine-v4-latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/xray:alpine-v4
+            ${{ secrets.DOCKERHUB_USERNAME }}/xray:latest-v4
+            ghcr.io/${{ needs.pre.outputs.ACTOR_LC }}/xray:alpine-v4-${{ needs.pre.outputs.core_release_version }}
+            ghcr.io/${{ needs.pre.outputs.ACTOR_LC }}/xray:alpine-v4-latest
+            ghcr.io/${{ needs.pre.outputs.ACTOR_LC }}/xray:alpine-v4
+            ghcr.io/${{ needs.pre.outputs.ACTOR_LC }}/xray:latest-v4
           #cache-from: type=registry,ref=ghcr.io/${{ needs.pre.outputs.ACTOR_LC }}/xray:buildcache
           #cache-to: type=registry,ref=ghcr.io/${{ needs.pre.outputs.ACTOR_LC }}/xray:buildcache,mode=max
           # 完全禁用缓存(二选一)

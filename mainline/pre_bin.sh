@@ -6,6 +6,7 @@ set -eux
 # env
 USE_TARGETPLATFORM="${TARGETPLATFORM:-unknown}"
 USE_ACCOUNT="${RELEASE_ACCOUNT:-DTCproto}"
+USE_GOAMD64="${GOAMD64:-}"
 
 # 判断CPU
 ### eg: linux/amd64,linux/arm64,linux/arm/v7
@@ -38,7 +39,7 @@ case "${USE_ACCOUNT}" in
     download_url="https://github.com/${X_RELEASE_ACCOUNT}/${X_RELEASE_REPO}/releases/download/${X_RELEASE_VERSION}/${FILE_NAME}.zip"
     ;;
   *)
-    download_url="https://github.com/${V2_RELEASE_ACCOUNT}/${V2_RELEASE_REPO}/releases/download/${V2_RELEASE_VERSION}/${FILE_NAME}.zip"
+    download_url="https://github.com/${V2_RELEASE_ACCOUNT}/${V2_RELEASE_REPO}/releases/download/${V2_RELEASE_VERSION}/${FILE_NAME}${USE_GOAMD64}.zip"
     ;;
 esac
 
