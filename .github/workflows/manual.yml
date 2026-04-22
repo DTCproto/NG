@@ -417,7 +417,7 @@ jobs:
     steps:
       - name: Get current date time
         run: |
-          echo "current_date_time=$(date -d "8 hour" -u +'%Y%m%d-%H%M%S')" >> "$GITHUB_ENV"
+          echo "current_date_time=$(date -d '8 hour' -u +'%Y%m%d-%H%M%S')" >> "$GITHUB_ENV"
 
       - name: Install System Tools
         run: |
