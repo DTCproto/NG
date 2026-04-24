@@ -467,7 +467,7 @@ jobs:
           tag_name: "V-${{ env.current_date_time }}"
           name: "V-${{ env.current_date_time }}"
           token: ${{ secrets.GITHUB_TOKEN }}
-          prerelease: false
+          prerelease: ${{ !inputs.build_xray_elf }}
           body: |
             V2rayNG(Xray) build result.
             Xray-core from [${{ needs.pre.outputs.x_branch }}] [${{ needs.build.outputs.xray_short_commit_id }}]
@@ -475,4 +475,3 @@ jobs:
             hev-socks5-tunnel from [${{ needs.build.outputs.hevtun_short_commit_id }}]
           files: |
             ${{ github.workspace }}/archives/**
-
