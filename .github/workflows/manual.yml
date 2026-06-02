@@ -69,8 +69,8 @@ jobs:
       default_commit_id: "HEAD~0"
       ndk_version: "29.0.14206865"
       cmdline_tools_version: "14742923"
-      platforms_short_version: "36"
-      platforms_full_version: "36.1.0"
+      platforms_short_version: "37"
+      platforms_full_version: "37.0.0"
     steps:
       - name: set global params
         id: set_global_params
