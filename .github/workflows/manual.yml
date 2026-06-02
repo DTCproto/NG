@@ -69,7 +69,7 @@ jobs:
       default_commit_id: "HEAD~0"
       ndk_version: "29.0.14206865"
       cmdline_tools_version: "14742923"
-      platforms_short_version: "37"
+      platforms_short_version: "37.0"
       platforms_full_version: "37.0.0"
     steps:
       - name: set global params
@@ -324,7 +324,7 @@ jobs:
           cd ${{ github.workspace }}/build/AndroidLibXrayLite
           gomobile init
           go mod tidy -v
-          gomobile bind -v -androidapi 24 -trimpath -ldflags='-s -w -buildid=' ./
+          gomobile bind -v -androidapi 24 -trimpath -ldflags='-s -w -buildid= -checklinkname=0' ./
           mkdir -p ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/libs
           cp *.aar ${{ github.workspace }}/build/v2rayNG/V2rayNG/app/libs/
 
